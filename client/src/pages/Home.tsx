@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'wouter';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowDown, ArrowUpRight, Play } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { collections } from '@/lib/mockData';
@@ -9,6 +9,7 @@ import { useProducts } from '@/context/ProductContext';
 import heroImage from '@assets/generated_images/luxury_jewelry_hero_image_with_model.png';
 import necklaceImage from '@assets/generated_images/gold_necklace_product_shot.png';
 import campaignVideo from '@assets/generated_videos/b&w_jewelry_fashion_b-roll.mp4';
+import useEmblaCarousel from 'embla-carousel-react';
 
 export default function Home() {
   const { products } = useProducts();
@@ -17,6 +18,21 @@ export default function Home() {
   const y2 = useTransform(scrollY, [0, 500], [0, -100]);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   
+  // Carousel setup
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    align: 'start',
+    containScroll: 'trimSnaps',
+    dragFree: true
+  });
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
       
@@ -129,35 +145,54 @@ export default function Home() {
         </motion.div>
       </div>
 
-      {/* Horizontal Scroll Product Section */}
+      {/* Horizontal Product Carousel Section */}
       <section className="py-32 pl-4 md:pl-12 overflow-hidden">
         <div className="flex justify-between items-end pr-12 mb-16">
           <h2 className="font-display text-4xl font-medium">Últimos Drops</h2>
-          <Link href="/shop" className="font-mono text-xs uppercase tracking-widest hover:underline underline-offset-4">Ver Tudo</Link>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={scrollPrev}
+              className="h-10 w-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button 
+              onClick={scrollNext}
+              className="h-10 w-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex gap-8 overflow-x-auto pb-12 pr-12 scrollbar-hide">
-          {products.slice(0, 5).map((product, idx) => (
-            <Link key={product.id} href={`/product/${product.id}`} className="shrink-0 w-[300px] md:w-[400px] group cursor-pointer">
-              <div className="aspect-[3/4] bg-secondary overflow-hidden mb-6 relative">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:grayscale-0 grayscale"
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-              </div>
-              <div className="flex justify-between items-start border-b border-border pb-2 group-hover:border-black transition-colors">
-                <div>
-                  <h3 className="font-display text-xl mb-1">{product.name}</h3>
-                  <span className="font-mono text-xs text-muted-foreground uppercase">{product.category}</span>
+        <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
+          <div className="flex gap-8 pr-12">
+            {products.slice(0, 8).map((product, idx) => (
+              <Link key={product.id} href={`/product/${product.id}`} className="shrink-0 w-[300px] md:w-[400px] group cursor-pointer select-none">
+                <div className="aspect-[3/4] bg-secondary overflow-hidden mb-6 relative">
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:grayscale-0 grayscale"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                 </div>
-                <span className="font-mono text-sm">
-                  R$ {product.price.toLocaleString()}
-                </span>
-              </div>
-            </Link>
-          ))}
+                <div className="flex justify-between items-start border-b border-border pb-2 group-hover:border-black transition-colors">
+                  <div>
+                    <h3 className="font-display text-xl mb-1">{product.name}</h3>
+                    <span className="font-mono text-xs text-muted-foreground uppercase">{product.category}</span>
+                  </div>
+                  <span className="font-mono text-sm">
+                    R$ {product.price.toLocaleString()}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+        
+        <div className="mt-12 pr-12 flex justify-center md:justify-end">
+           <Link href="/shop" className="font-mono text-xs uppercase tracking-widest hover:underline underline-offset-4">Ver Toda a Coleção</Link>
         </div>
       </section>
 
