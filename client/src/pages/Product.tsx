@@ -35,6 +35,11 @@ export default function Product() {
     });
   };
 
+  // Get related products (same category, excluding current)
+  const relatedProducts = products
+    .filter(p => p.category === product.category && p.id !== product.id)
+    .slice(0, 3);
+
   return (
     <div className="min-h-screen bg-background pt-32 pb-24">
       <div className="container mx-auto px-6 md:px-12">
@@ -44,7 +49,7 @@ export default function Product() {
            </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 mb-32">
           {/* Product Image - Sticky on Desktop */}
           <div className="lg:col-span-7 relative">
              <div className="sticky top-32 aspect-[3/4] bg-secondary overflow-hidden">
@@ -114,6 +119,30 @@ export default function Product() {
             </div>
           </div>
         </div>
+
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <div className="border-t border-border pt-24">
+            <h2 className="font-display text-3xl mb-12">Você também pode gostar</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {relatedProducts.map((related) => (
+                <Link key={related.id} href={`/product/${related.id}`} className="group cursor-pointer block">
+                  <div className="aspect-[3/4] bg-secondary overflow-hidden mb-4 relative">
+                    <img 
+                      src={related.image} 
+                      alt={related.name}
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
+                    />
+                  </div>
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-display text-lg leading-none mb-1 group-hover:underline underline-offset-4 decoration-1">{related.name}</h3>
+                    <p className="font-mono text-xs">R$ {related.price.toLocaleString('pt-BR')}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

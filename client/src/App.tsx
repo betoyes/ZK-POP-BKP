@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { PageTransition } from "@/components/layout/PageTransition";
 import { ProductProvider } from "@/context/ProductContext";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
@@ -21,21 +22,23 @@ import Contact from "@/pages/Contact";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/login" component={Login} />
-      <Route path="/account" component={Account} />
-      <Route path="/shop" component={Shop} />
-      <Route path="/collections" component={Shop} /> {/* Alias for Shop */}
-      <Route path="/product/:id" component={Product} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/checkout" component={Checkout} />
-      <Route path="/admin" component={AdminLogin} />
-      <Route path="/admin/dashboard" component={Dashboard} />
-      <Route path="/about" component={About} />
-      <Route path="/contact" component={Contact} />
-      <Route component={NotFound} />
-    </Switch>
+    <PageTransition>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/login" component={Login} />
+        <Route path="/account" component={Account} />
+        <Route path="/shop" component={Shop} />
+        <Route path="/collections" component={Shop} /> {/* Alias for Shop */}
+        <Route path="/product/:id" component={Product} />
+        <Route path="/cart" component={Cart} />
+        <Route path="/checkout" component={Checkout} />
+        <Route path="/admin" component={AdminLogin} />
+        <Route path="/admin/dashboard" component={Dashboard} />
+        <Route path="/about" component={About} />
+        <Route path="/contact" component={Contact} />
+        <Route component={NotFound} />
+      </Switch>
+    </PageTransition>
   );
 }
 
