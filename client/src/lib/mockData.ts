@@ -35,6 +35,9 @@ export interface Branding {
   heroMediaUrl: string;
   manifestoTitle: string;
   manifestoText: string;
+  journalHeroImage: string;
+  journalHeroTitle: string;
+  journalHeroSubtitle: string;
 }
 
 export const initialBranding: Branding = {
@@ -44,8 +47,51 @@ export const initialBranding: Branding = {
   heroMediaType: 'image',
   heroMediaUrl: heroImage,
   manifestoTitle: 'Redefinindo o Luxo',
-  manifestoText: 'Acreditamos em joias que falam a linguagem da arquitetura moderna. Linhas limpas, formas ousadas e uma presença inegável.'
+  manifestoText: 'Acreditamos em joias que falam a linguagem da arquitetura moderna. Linhas limpas, formas ousadas e uma presença inegável.',
+  journalHeroImage: heroImage,
+  journalHeroTitle: 'O Novo Luxo é Sustentável',
+  journalHeroSubtitle: 'Editorial'
 };
+
+export interface JournalPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  content: string;
+  date: string;
+  category: string;
+  image: string;
+}
+
+export const initialPosts: JournalPost[] = [
+  {
+    id: 1,
+    title: "O Guia Definitivo de Diamantes",
+    excerpt: "Entenda os 4 Cs e como escolher a pedra perfeita para sua joia eterna.",
+    content: "Diamantes são eternos, mas escolher o perfeito requer conhecimento. Os 4 Cs - Cut (Lapidação), Color (Cor), Clarity (Pureza) e Carat (Quilates) - são o padrão global para avaliar a qualidade dos diamantes. Neste guia, exploramos cada um desses aspectos em profundidade...",
+    date: "28 Nov 2026",
+    category: "Educação",
+    image: ringImage
+  },
+  {
+    id: 2,
+    title: "Tendências de Outono 2026",
+    excerpt: "O retorno do ouro amarelo e design maximalista.",
+    content: "O outono de 2026 traz consigo uma nostalgia vibrante. O ouro amarelo, por muito tempo deixado de lado em favor do ouro branco e da platina, retorna com força total. Designs maximalistas, peças statement e sobreposições ousadas dominam as passarelas e as vitrines...",
+    date: "25 Nov 2026",
+    category: "Tendências",
+    image: necklaceImage
+  },
+  {
+    id: 3,
+    title: "Cuidados com Suas Joias",
+    excerpt: "Como manter o brilho e a integridade de suas peças por gerações.",
+    content: "Suas joias são investimentos emocionais e financeiros. Para garantir que elas durem gerações, é crucial adotar uma rotina de cuidados. Evite contato com produtos químicos, limpe regularmente com flanela macia e guarde cada peça individualmente para evitar riscos...",
+    date: "20 Nov 2026",
+    category: "Care",
+    image: earringsImage
+  }
+];
 
 export const categories: Category[] = [
   { id: 'aneis', name: 'Anéis', description: 'Símbolos de eternidade e compromisso.' },

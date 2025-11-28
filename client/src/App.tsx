@@ -21,6 +21,7 @@ import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Wishlist from "@/pages/Wishlist";
 import Journal from "@/pages/Journal";
+import JournalPost from "@/pages/JournalPost";
 import Lookbook from "@/pages/Lookbook";
 import Collections from "@/pages/Collections";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
@@ -44,6 +45,7 @@ function Router() {
         <Route path="/contact" component={Contact} />
         <Route path="/wishlist" component={Wishlist} />
         <Route path="/journal" component={Journal} />
+        <Route path="/journal/:id" component={JournalPost} />
         <Route path="/lookbook" component={Lookbook} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
         <Route path="/terms-of-use" component={TermsOfUse} />

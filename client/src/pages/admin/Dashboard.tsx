@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import { useProducts } from '@/context/ProductContext';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Package, DollarSign, Users, TrendingUp, Edit, Trash, Plus, Search, LayoutGrid, Tags, ShoppingCart } from 'lucide-react';
+import { BookOpen, Package, DollarSign, Users, TrendingUp, Edit, Trash, Plus, Search, LayoutGrid, Tags, ShoppingCart } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -29,6 +29,7 @@ export default function Dashboard() {
     addProduct, updateProduct, deleteProduct,
     addCategory, deleteCategory,
     addCollection, deleteCollection,
+    posts, addPost, deletePost, updatePost,
     updateOrder, branding, updateBranding
   } = useProducts();
   const { toast } = useToast();
@@ -40,8 +41,12 @@ export default function Dashboard() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isAddCatOpen, setIsAddCatOpen] = useState(false);
   const [isAddColOpen, setIsAddColOpen] = useState(false);
+  const [isAddPostOpen, setIsAddPostOpen] = useState(false);
+  const [isEditPostOpen, setIsEditPostOpen] = useState(false);
   
   const [currentProduct, setCurrentProduct] = useState<any>(null);
+  const [currentPost, setCurrentPost] = useState<any>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -53,10 +58,15 @@ export default function Dashboard() {
 
   const [catFormData, setCatFormData] = useState({ name: '', description: '' });
   const [colFormData, setColFormData] = useState({ name: '', description: '' });
+  const [postFormData, setPostFormData] = useState({ title: '', excerpt: '', content: '', category: '', image: '' });
   const [brandingForm, setBrandingForm] = useState(branding);
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const filteredPosts = posts.filter(p => 
+    p.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const salesData = [
@@ -171,6 +181,43 @@ export default function Dashboard() {
     }
   };
 
+  // Post Handlers
+  const handleAddPost = () => {
+    if (!postFormData.title) return;
+    addPost(postFormData);
+    setIsAddPostOpen(false);
+    setPostFormData({ title: '', excerpt: '', content: '', category: '', image: '' });
+    toast({ title: "Sucesso", description: "Post adicionado" });
+  };
+
+  const handleEditPost = () => {
+    if (!currentPost) return;
+    updatePost(currentPost.id, postFormData);
+    setIsEditPostOpen(false);
+    setCurrentPost(null);
+    setPostFormData({ title: '', excerpt: '', content: '', category: '', image: '' });
+    toast({ title: "Sucesso", description: "Post atualizado" });
+  };
+
+  const handleDeletePost = (id: number) => {
+    if (confirm('Excluir post?')) {
+      deletePost(id);
+      toast({ title: "Sucesso", description: "Post removido" });
+    }
+  };
+
+  const openEditPost = (post: any) => {
+    setCurrentPost(post);
+    setPostFormData({
+      title: post.title,
+      excerpt: post.excerpt,
+      content: post.content,
+      category: post.category,
+      image: post.image
+    });
+    setIsEditPostOpen(true);
+  };
+
   const handleSaveBranding = () => {
     updateBranding(brandingForm);
     toast({ title: "Sucesso", description: "Branding atualizado com sucesso" });
@@ -200,6 +247,7 @@ export default function Dashboard() {
             <TabsTrigger value="products" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Produtos</TabsTrigger>
             <TabsTrigger value="categories" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Categorias</TabsTrigger>
             <TabsTrigger value="collections" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Coleções</TabsTrigger>
+            <TabsTrigger value="journal" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Journal</TabsTrigger>
             <TabsTrigger value="customers" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Clientes</TabsTrigger>
             <TabsTrigger value="branding" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Branding</TabsTrigger>
           </TabsList>
@@ -578,6 +626,129 @@ export default function Dashboard() {
               </Table>
             </div>
           </TabsContent>
+
+          {/* JOURNAL TAB */}
+          <TabsContent value="journal" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Buscar posts..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 rounded-none border-border bg-transparent h-10 font-mono text-xs" 
+                />
+              </div>
+              
+              <Dialog open={isAddPostOpen} onOpenChange={setIsAddPostOpen}>
+                <DialogTrigger asChild>
+                  <Button className="rounded-none bg-black text-white hover:bg-primary uppercase tracking-widest font-mono text-xs px-6 h-10 flex gap-2">
+                    <Plus className="h-4 w-4" /> Novo Post
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px] bg-background border border-border">
+                  <DialogHeader>
+                    <DialogTitle className="font-display text-2xl">Adicionar Post</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label>Título</Label>
+                      <Input value={postFormData.title} onChange={(e) => setPostFormData({...postFormData, title: e.target.value})} className="rounded-none" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Categoria</Label>
+                      <Input value={postFormData.category} onChange={(e) => setPostFormData({...postFormData, category: e.target.value})} className="rounded-none" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Resumo</Label>
+                      <Textarea value={postFormData.excerpt} onChange={(e) => setPostFormData({...postFormData, excerpt: e.target.value})} className="rounded-none" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Conteúdo Completo</Label>
+                      <Textarea value={postFormData.content} onChange={(e) => setPostFormData({...postFormData, content: e.target.value})} className="rounded-none h-40" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Imagem (URL)</Label>
+                      <Input value={postFormData.image} onChange={(e) => setPostFormData({...postFormData, image: e.target.value})} className="rounded-none" />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleAddPost} className="rounded-none w-full bg-black text-white hover:bg-primary uppercase tracking-widest font-mono text-xs">Salvar</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="border border-border bg-card">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent border-b border-border">
+                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">Imagem</TableHead>
+                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">Título</TableHead>
+                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">Data</TableHead>
+                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">Categoria</TableHead>
+                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12 text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredPosts.map((post) => (
+                    <TableRow key={post.id} className="hover:bg-secondary/30 border-b border-border transition-colors">
+                      <TableCell className="py-4">
+                        <div className="h-12 w-12 bg-secondary overflow-hidden">
+                          <img src={post.image} alt={post.title} className="h-full w-full object-cover" />
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-display text-base">{post.title}</TableCell>
+                      <TableCell className="font-mono text-xs uppercase tracking-widest">{post.date}</TableCell>
+                      <TableCell className="font-mono text-xs uppercase tracking-widest">{post.category}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button onClick={() => openEditPost(post)} variant="ghost" size="icon" className="h-8 w-8 hover:text-black hover:bg-transparent"><Edit className="h-4 w-4" /></Button>
+                          <Button onClick={() => handleDeletePost(post.id)} variant="ghost" size="icon" className="h-8 w-8 hover:text-destructive hover:bg-transparent"><Trash className="h-4 w-4" /></Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Edit Post Dialog */}
+            <Dialog open={isEditPostOpen} onOpenChange={setIsEditPostOpen}>
+              <DialogContent className="sm:max-w-[600px] bg-background border border-border">
+                <DialogHeader>
+                  <DialogTitle className="font-display text-2xl">Editar Post</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label>Título</Label>
+                    <Input value={postFormData.title} onChange={(e) => setPostFormData({...postFormData, title: e.target.value})} className="rounded-none" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Categoria</Label>
+                    <Input value={postFormData.category} onChange={(e) => setPostFormData({...postFormData, category: e.target.value})} className="rounded-none" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Resumo</Label>
+                    <Textarea value={postFormData.excerpt} onChange={(e) => setPostFormData({...postFormData, excerpt: e.target.value})} className="rounded-none" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Conteúdo Completo</Label>
+                    <Textarea value={postFormData.content} onChange={(e) => setPostFormData({...postFormData, content: e.target.value})} className="rounded-none h-40" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Imagem (URL)</Label>
+                    <Input value={postFormData.image} onChange={(e) => setPostFormData({...postFormData, image: e.target.value})} className="rounded-none" />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleEditPost} className="rounded-none w-full bg-black text-white hover:bg-primary uppercase tracking-widest font-mono text-xs">Atualizar</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+          </TabsContent>
+
           {/* BRANDING TAB */}
           <TabsContent value="branding" className="space-y-8 max-w-2xl">
             <div className="space-y-6 border border-border p-8 bg-card">
@@ -653,6 +824,36 @@ export default function Dashboard() {
                   <Input 
                     value={brandingForm.manifestoText} 
                     onChange={(e) => setBrandingForm({...brandingForm, manifestoText: e.target.value})}
+                    className="rounded-none"
+                  />
+                </div>
+
+                <div className="border-t border-border my-6"></div>
+                <h3 className="font-display text-lg">Configurações do Journal</h3>
+
+                <div className="grid gap-2">
+                  <Label>Título do Hero (Journal)</Label>
+                  <Input 
+                    value={brandingForm.journalHeroTitle} 
+                    onChange={(e) => setBrandingForm({...brandingForm, journalHeroTitle: e.target.value})}
+                    className="rounded-none"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Subtítulo do Hero (Journal)</Label>
+                  <Input 
+                    value={brandingForm.journalHeroSubtitle} 
+                    onChange={(e) => setBrandingForm({...brandingForm, journalHeroSubtitle: e.target.value})}
+                    className="rounded-none"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Imagem de Capa (Journal)</Label>
+                  <Input 
+                    value={brandingForm.journalHeroImage} 
+                    onChange={(e) => setBrandingForm({...brandingForm, journalHeroImage: e.target.value})}
                     className="rounded-none"
                   />
                 </div>

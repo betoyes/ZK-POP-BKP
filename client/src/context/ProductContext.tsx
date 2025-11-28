@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Product, products as initialProducts, Category, categories as initialCategories, Collection, collections as initialCollections, Branding, initialBranding } from '@/lib/mockData';
+import { Product, products as initialProducts, Category, categories as initialCategories, Collection, collections as initialCollections, Branding, initialBranding, JournalPost, initialPosts } from '@/lib/mockData';
 import ringImage from '@assets/generated_images/diamond_ring_product_shot.png';
-import necklaceImage from '@assets/generated_images/gold_necklace_product_shot.png';
-import earringsImage from '@assets/generated_images/pearl_earrings_product_shot.png';
 
 // Mock initial orders
 const initialOrders = [
@@ -22,41 +20,13 @@ const initialCustomers = [
   { id: 'CUST-005', name: 'Beatriz Costa', email: 'bia@email.com', orders: 8, totalSpent: 82000, lastOrder: '2026-11-24' },
 ];
 
-// Mock initial posts
-const initialPosts = [
-  {
-    id: 1,
-    title: "O Guia Definitivo de Diamantes",
-    excerpt: "Entenda os 4 Cs e como escolher a pedra perfeita para sua joia eterna.",
-    date: "28 Nov 2026",
-    category: "Educação",
-    image: ringImage
-  },
-  {
-    id: 2,
-    title: "Tendências de Outono 2026",
-    excerpt: "O retorno do ouro amarelo e design maximalista.",
-    date: "25 Nov 2026",
-    category: "Tendências",
-    image: necklaceImage
-  },
-  {
-    id: 3,
-    title: "Cuidados com Suas Joias",
-    excerpt: "Como manter o brilho e a integridade de suas peças por gerações.",
-    date: "20 Nov 2026",
-    category: "Care",
-    image: earringsImage
-  }
-];
-
 interface ProductContextType {
   products: Product[];
   categories: Category[];
   collections: Collection[];
   orders: any[];
   customers: any[];
-  posts: any[];
+  posts: JournalPost[];
   wishlist: number[];
   branding: Branding;
   
@@ -69,6 +39,10 @@ interface ProductContextType {
   
   addCollection: (collection: Omit<Collection, 'id'>) => void;
   deleteCollection: (id: string) => void;
+  
+  addPost: (post: Omit<JournalPost, 'id' | 'date'>) => void;
+  deletePost: (id: number) => void;
+  updatePost: (id: number, post: Partial<JournalPost>) => void;
   
   updateOrder: (id: string, status: string) => void;
   toggleWishlist: (productId: number) => void;
@@ -83,7 +57,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const [collections, setCollections] = useState<Collection[]>(initialCollections);
   const [orders, setOrders] = useState(initialOrders);
   const [customers] = useState(initialCustomers);
-  const [posts] = useState(initialPosts);
+  const [posts, setPosts] = useState<JournalPost[]>(initialPosts);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [branding, setBranding] = useState<Branding>(initialBranding);
 
@@ -131,6 +105,21 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const deleteCollection = (id: string) => {
     setCollections(collections.filter(c => c.id !== id));
   };
+  
+  // Posts
+  const addPost = (newPost: Omit<JournalPost, 'id' | 'date'>) => {
+    const id = Math.max(...posts.map(p => p.id), 0) + 1;
+    const date = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    setPosts([...posts, { ...newPost, id, date }]);
+  };
+
+  const deletePost = (id: number) => {
+    setPosts(posts.filter(p => p.id !== id));
+  };
+
+  const updatePost = (id: number, updatedFields: Partial<JournalPost>) => {
+    setPosts(posts.map(p => (p.id === id ? { ...p, ...updatedFields } : p)));
+  };
 
   // Orders
   const updateOrder = (id: string, status: string) => {
@@ -152,6 +141,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       addProduct, updateProduct, deleteProduct,
       addCategory, deleteCategory,
       addCollection, deleteCollection,
+      addPost, deletePost, updatePost,
       updateOrder, toggleWishlist,
       branding, updateBranding
     }}>
