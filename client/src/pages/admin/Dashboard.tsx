@@ -28,7 +28,7 @@ export default function Dashboard() {
     addProduct, updateProduct, deleteProduct,
     addCategory, deleteCategory,
     addCollection, deleteCollection,
-    updateOrder
+    updateOrder, branding, updateBranding
   } = useProducts();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,6 +52,7 @@ export default function Dashboard() {
 
   const [catFormData, setCatFormData] = useState({ name: '', description: '' });
   const [colFormData, setColFormData] = useState({ name: '', description: '' });
+  const [brandingForm, setBrandingForm] = useState(branding);
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -169,6 +170,11 @@ export default function Dashboard() {
     }
   };
 
+  const handleSaveBranding = () => {
+    updateBranding(brandingForm);
+    toast({ title: "Sucesso", description: "Branding atualizado com sucesso" });
+  };
+
   return (
     <div className="min-h-screen bg-background pt-32 pb-24">
       <div className="container mx-auto px-6 md:px-12">
@@ -194,6 +200,7 @@ export default function Dashboard() {
             <TabsTrigger value="categories" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Categorias</TabsTrigger>
             <TabsTrigger value="collections" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Coleções</TabsTrigger>
             <TabsTrigger value="customers" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Clientes</TabsTrigger>
+            <TabsTrigger value="branding" className="rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:shadow-none px-0 py-4 font-mono text-xs uppercase tracking-widest">Branding</TabsTrigger>
           </TabsList>
 
           {/* OVERVIEW TAB */}
@@ -568,6 +575,62 @@ export default function Dashboard() {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+          </TabsContent>
+          {/* BRANDING TAB */}
+          <TabsContent value="branding" className="space-y-8 max-w-2xl">
+            <div className="space-y-6 border border-border p-8 bg-card">
+              <h2 className="font-display text-2xl">Identidade Visual</h2>
+              <div className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label>Nome da Marca</Label>
+                  <Input 
+                    value={brandingForm.companyName} 
+                    onChange={(e) => setBrandingForm({...brandingForm, companyName: e.target.value})}
+                    className="rounded-none"
+                  />
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label>Título Principal (Hero)</Label>
+                  <Input 
+                    value={brandingForm.heroTitle} 
+                    onChange={(e) => setBrandingForm({...brandingForm, heroTitle: e.target.value})}
+                    className="rounded-none"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Subtítulo (Hero)</Label>
+                  <Input 
+                    value={brandingForm.heroSubtitle} 
+                    onChange={(e) => setBrandingForm({...brandingForm, heroSubtitle: e.target.value})}
+                    className="rounded-none"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Título do Manifesto</Label>
+                  <Input 
+                    value={brandingForm.manifestoTitle} 
+                    onChange={(e) => setBrandingForm({...brandingForm, manifestoTitle: e.target.value})}
+                    className="rounded-none"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Texto do Manifesto</Label>
+                  <Input 
+                    value={brandingForm.manifestoText} 
+                    onChange={(e) => setBrandingForm({...brandingForm, manifestoText: e.target.value})}
+                    className="rounded-none"
+                  />
+                </div>
+
+                <Button onClick={handleSaveBranding} className="rounded-none bg-black text-white hover:bg-primary uppercase tracking-widest font-mono text-xs mt-4">
+                  Salvar Alterações
+                </Button>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

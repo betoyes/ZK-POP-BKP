@@ -12,7 +12,7 @@ import campaignVideo from '@assets/generated_videos/b&w_jewelry_fashion_b-roll.m
 import useEmblaCarousel from 'embla-carousel-react';
 
 export default function Home() {
-  const { products } = useProducts();
+  const { products, branding } = useProducts();
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -100]);
@@ -51,15 +51,15 @@ export default function Home() {
         
         <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-12 z-10 mix-blend-difference text-white pointer-events-none">
           <div className="flex justify-between items-start">
-            <span className="font-mono text-xs tracking-[0.5em] uppercase">Coleção 01</span>
+            <span className="font-mono text-xs tracking-[0.5em] uppercase">{branding.heroSubtitle}</span>
             <span className="font-mono text-xs tracking-[0.5em] uppercase text-right hidden md:block">
               São Paulo<br/>Paris<br/>Tóquio
             </span>
           </div>
           
           <div className="space-y-4">
-            <h1 className="font-display text-[12vw] leading-[0.8] font-bold tracking-tighter uppercase">
-              Herança<br/><span className="ml-[10vw]">Futura</span>
+            <h1 className="font-display text-[12vw] leading-[0.8] font-bold tracking-tighter uppercase whitespace-pre-line">
+              {branding.heroTitle}
             </h1>
           </div>
 
@@ -98,10 +98,10 @@ export default function Home() {
           <div className="md:col-span-4 flex flex-col justify-between">
             <div>
               <h2 className="font-display text-4xl md:text-5xl font-medium mb-8 tracking-tight leading-[1.1]">
-                Redefinindo<br/>o Luxo
+                {branding.manifestoTitle}
               </h2>
               <p className="font-mono text-sm text-muted-foreground leading-relaxed max-w-xs mb-12">
-                Acreditamos em joias que falam a linguagem da arquitetura moderna. Linhas limpas, formas ousadas e uma presença inegável.
+                {branding.manifestoText}
               </p>
             </div>
             <Link href="/about" className="group flex items-center gap-2 font-mono text-xs uppercase tracking-widest hover:opacity-50 transition-opacity">
@@ -134,11 +134,11 @@ export default function Home() {
           transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
           className="flex gap-12 font-display text-8xl md:text-9xl font-bold tracking-tighter uppercase opacity-20"
         >
-          <span>ZK REZK</span>
+          <span>{branding.companyName}</span>
           <span>Eterno</span>
           <span>Moderno</span>
           <span>Luxo</span>
-          <span>ZK REZK</span>
+          <span>{branding.companyName}</span>
           <span>Eterno</span>
           <span>Moderno</span>
           <span>Luxo</span>

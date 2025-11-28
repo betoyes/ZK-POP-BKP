@@ -27,6 +27,24 @@ export interface Collection {
   image: string;
 }
 
+export interface Branding {
+  companyName: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroImage: string;
+  manifestoTitle: string;
+  manifestoText: string;
+}
+
+export const initialBranding: Branding = {
+  companyName: 'ZK REZK',
+  heroTitle: 'Herança Futura',
+  heroSubtitle: 'Coleção 01',
+  heroImage: heroImage,
+  manifestoTitle: 'Redefinindo o Luxo',
+  manifestoText: 'Acreditamos em joias que falam a linguagem da arquitetura moderna. Linhas limpas, formas ousadas e uma presença inegável.'
+};
+
 export const categories: Category[] = [
   { id: 'aneis', name: 'Anéis', description: 'Símbolos de eternidade e compromisso.' },
   { id: 'colares', name: 'Colares', description: 'Elegância que envolve.' },

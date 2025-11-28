@@ -1,7 +1,9 @@
 import { Link } from 'wouter';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
+import { useProducts } from '@/context/ProductContext';
 
 export function Footer() {
+  const { branding } = useProducts();
   return (
     <footer className="bg-background border-t border-border pt-20 pb-10">
       <div className="container mx-auto px-4 md:px-12">
@@ -10,7 +12,7 @@ export function Footer() {
           {/* Brand / Big Logo */}
           <div className="md:col-span-6 flex flex-col justify-between h-full">
             <div className="font-display text-[10vw] leading-[0.8] font-bold tracking-tighter opacity-10 select-none">
-              ZK REZK
+              {branding.companyName}
             </div>
             <div className="mt-8 max-w-sm">
               <p className="font-mono text-xs text-muted-foreground uppercase leading-relaxed">
@@ -50,7 +52,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4 font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
-          <p>&copy; 2026 ZK REZK JEWELRY. TODOS OS DIREITOS RESERVADOS.</p>
+          <p>&copy; 2026 {branding.companyName} JEWELRY. TODOS OS DIREITOS RESERVADOS.</p>
           <div className="flex gap-8">
             <Link href="/privacy-policy" className="hover:text-foreground">Política de Privacidade</Link>
             <Link href="/terms-of-use" className="hover:text-foreground">Termos de Uso</Link>

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Product, products as initialProducts, Category, categories as initialCategories, Collection, collections as initialCollections } from '@/lib/mockData';
+import { Product, products as initialProducts, Category, categories as initialCategories, Collection, collections as initialCollections, Branding, initialBranding } from '@/lib/mockData';
 import ringImage from '@assets/generated_images/diamond_ring_product_shot.png';
 import necklaceImage from '@assets/generated_images/gold_necklace_product_shot.png';
 import earringsImage from '@assets/generated_images/pearl_earrings_product_shot.png';
@@ -58,6 +58,7 @@ interface ProductContextType {
   customers: any[];
   posts: any[];
   wishlist: number[];
+  branding: Branding;
   
   addProduct: (product: Omit<Product, 'id'>) => void;
   updateProduct: (id: number, product: Partial<Product>) => void;
@@ -71,6 +72,7 @@ interface ProductContextType {
   
   updateOrder: (id: string, status: string) => void;
   toggleWishlist: (productId: number) => void;
+  updateBranding: (newBranding: Partial<Branding>) => void;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -83,6 +85,12 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const [customers] = useState(initialCustomers);
   const [posts] = useState(initialPosts);
   const [wishlist, setWishlist] = useState<number[]>([]);
+  const [branding, setBranding] = useState<Branding>(initialBranding);
+
+  // Branding
+  const updateBranding = (newBranding: Partial<Branding>) => {
+    setBranding(prev => ({ ...prev, ...newBranding }));
+  };
 
   // Products
   const addProduct = (newProduct: Omit<Product, 'id'>) => {
@@ -144,7 +152,8 @@ export function ProductProvider({ children }: { children: ReactNode }) {
       addProduct, updateProduct, deleteProduct,
       addCategory, deleteCategory,
       addCollection, deleteCollection,
-      updateOrder, toggleWishlist
+      updateOrder, toggleWishlist,
+      branding, updateBranding
     }}>
       {children}
     </ProductContext.Provider>
