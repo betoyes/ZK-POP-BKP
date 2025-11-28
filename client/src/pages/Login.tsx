@@ -11,7 +11,7 @@ import { ArrowRight, Info } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  password: z.string().min(5, "A senha deve ter no mínimo 5 caracteres"),
 });
 
 export default function Login() {
@@ -35,6 +35,13 @@ export default function Login() {
         description: "Login efetuado com sucesso.",
       });
       setTimeout(() => setLocation('/account'), 1000);
+    } else if (isLogin && values.email === "admin@aurum.com" && values.password === "admin") {
+       // Allow admin login from main login page for convenience
+       toast({
+        title: "Acesso Admin Detectado",
+        description: "Redirecionando para o painel...",
+      });
+      setTimeout(() => setLocation('/admin/dashboard'), 1000);
     } else if (isLogin) {
       toast({
          variant: "destructive",
