@@ -7,7 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Star, Truck, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Product() {
@@ -20,94 +20,93 @@ export default function Product() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
-        <h1 className="text-2xl font-serif">Produto não encontrado</h1>
-        <Link href="/shop"><Button>Voltar para Loja</Button></Link>
+      <div className="min-h-screen flex items-center justify-center flex-col gap-4 bg-background text-foreground">
+        <h1 className="font-display text-2xl">Artifact Not Found</h1>
+        <Link href="/shop"><Button variant="outline">Return to Archive</Button></Link>
       </div>
     );
   }
 
   const handleAddToCart = () => {
     toast({
-      title: "Adicionado ao carrinho",
-      description: `${product.name} foi adicionado à sua sacola.`,
+      title: "Added to Cart",
+      description: `${product.name} has been secured.`,
     });
   };
 
   return (
     <div className="min-h-screen bg-background pt-32 pb-24">
-      <div className="container mx-auto px-4">
-        <div className="mb-8">
-           <Link href="/shop" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              <ArrowLeft className="h-4 w-4" /> Voltar para Loja
+      <div className="container mx-auto px-6 md:px-12">
+        <div className="mb-12">
+           <Link href="/shop" className="group inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+              <ArrowLeft className="h-3 w-3 group-hover:-translate-x-1 transition-transform" /> Back to Archive
            </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
-          {/* Image Gallery (Mock - just one image for now) */}
-          <div className="bg-white aspect-[4/5] overflow-hidden relative">
-             <img 
-              src={product.image} 
-              alt={product.name} 
-              className="w-full h-full object-cover"
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+          {/* Product Image - Sticky on Desktop */}
+          <div className="lg:col-span-7 relative">
+             <div className="sticky top-32 aspect-[3/4] bg-secondary overflow-hidden">
+               <img 
+                src={product.image} 
+                alt={product.name} 
+                className="w-full h-full object-cover grayscale contrast-110"
+              />
+             </div>
           </div>
 
-          {/* Product Info */}
-          <div className="flex flex-col justify-center">
-            <div className="mb-2 text-primary uppercase tracking-widest text-xs font-semibold">
-              {product.collection}
-            </div>
-            <h1 className="font-serif text-4xl md:text-5xl mb-4">{product.name}</h1>
-            <div className="flex items-center gap-2 mb-6">
-              <div className="flex text-primary">
-                {[1,2,3,4,5].map(i => <Star key={i} className="h-4 w-4 fill-current" />)}
+          {/* Product Details */}
+          <div className="lg:col-span-5 flex flex-col justify-center">
+            <div className="border-t border-black pt-4 mb-8">
+              <div className="flex justify-between items-start mb-4">
+                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                  {product.collection} Collection
+                </span>
+                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                  Ref. {product.id.toString().padStart(4, '0')}
+                </span>
               </div>
-              <span className="text-xs text-muted-foreground">(12 avaliações)</span>
+              <h1 className="font-display text-5xl md:text-6xl font-medium tracking-tight mb-6 leading-none">{product.name}</h1>
+              <p className="font-mono text-xl">R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
 
-            <p className="text-2xl mb-8">R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-
-            <p className="text-muted-foreground leading-relaxed mb-10 font-light">
-              {product.description} Feito à mão pelos nossos mestres artesãos, esta peça representa o ápice da qualidade e design. Cada detalhe foi cuidadosamente pensado para garantir brilho e durabilidade excepcionais.
+            <p className="text-lg leading-relaxed mb-12 text-muted-foreground font-light">
+              {product.description} Crafted for the modern era, this piece exemplifies the balance between raw material and refined design.
             </p>
 
-            <div className="space-y-4 mb-12">
+            <div className="space-y-6 mb-16">
               <Button 
                 size="lg" 
-                className="w-full rounded-none h-14 bg-black text-white hover:bg-primary uppercase tracking-widest"
+                className="w-full rounded-none h-16 bg-foreground text-background hover:bg-foreground/90 font-mono text-xs uppercase tracking-widest flex items-center justify-between px-8"
                 onClick={handleAddToCart}
               >
-                Adicionar à Sacola
+                <span>Add to Bag</span>
+                <Plus className="h-4 w-4" />
               </Button>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <Truck className="h-5 w-5 text-foreground" />
-                <span>Frete grátis e seguro para todo o Brasil.</span>
-              </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <ShieldCheck className="h-5 w-5 text-foreground" />
-                <span>Garantia vitalícia e certificado de autenticidade.</span>
+              
+              <div className="font-mono text-[10px] uppercase tracking-widest text-center text-muted-foreground">
+                Free Global Shipping • Lifetime Warranty
               </div>
             </div>
 
-            <div className="mt-12">
+            {/* Technical Details Accordion */}
+            <div className="border-t border-border">
               <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="details">
-                  <AccordionTrigger className="font-serif text-lg">Detalhes do Produto</AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    Material: Ouro 18k<br/>
-                    Pedras: Diamantes certificados<br/>
-                    Peso: Aprox. 5g<br/>
-                    Acabamento: Polido à mão
+                <AccordionItem value="details" className="border-b border-border">
+                  <AccordionTrigger className="font-mono text-xs uppercase tracking-widest py-6 hover:no-underline">Technical Specifications</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground font-light pb-6">
+                    <ul className="space-y-2">
+                      <li>Material: 18K Solid Gold</li>
+                      <li>Gemstone: Certified Conflict-Free Diamond</li>
+                      <li>Weight: Approx. 5g</li>
+                      <li>Origin: Handcrafted in Italy</li>
+                    </ul>
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="shipping">
-                  <AccordionTrigger className="font-serif text-lg">Envio e Devoluções</AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    Enviamos em até 2 dias úteis. Aceitamos devoluções em até 30 dias após o recebimento, desde que a peça esteja em sua condição original.
+                <AccordionItem value="shipping" className="border-b border-border">
+                  <AccordionTrigger className="font-mono text-xs uppercase tracking-widest py-6 hover:no-underline">Shipping & Returns</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground font-light pb-6">
+                    Complimentary express shipping worldwide. Returns accepted within 14 days of delivery in original condition.
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>

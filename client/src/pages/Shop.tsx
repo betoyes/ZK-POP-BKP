@@ -5,10 +5,10 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
 export default function Shop() {
   const [location] = useLocation();
-  // Extract query params manually or use a library. Simple manual check for now.
   const urlParams = new URLSearchParams(window.location.search);
   const initialCategory = urlParams.get('category') || 'all';
 
@@ -22,53 +22,49 @@ export default function Shop() {
   });
 
   return (
-    <div className="min-h-screen bg-background pt-24">
-      {/* Header */}
-      <div className="bg-secondary/30 py-16 mb-12">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="font-serif text-4xl md:text-5xl mb-4">Nossa Coleção</h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Explore nossa seleção exclusiva de joias finas, criadas para celebrar os momentos mais preciosos da vida.
-          </p>
+    <div className="min-h-screen bg-background pt-32">
+      
+      <div className="container mx-auto px-6 md:px-12 pb-24">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-20 border-b border-border pb-8">
+          <div>
+             <h1 className="font-display text-6xl md:text-8xl font-bold tracking-tighter mb-4">Archive</h1>
+             <p className="font-mono text-sm text-muted-foreground uppercase tracking-widest max-w-md">
+               Curated selection of artifacts for the modern individual.
+             </p>
+          </div>
+          <div className="font-mono text-xs mb-2">
+            {filteredProducts.length} ITEMS
+          </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 pb-24">
-        <div className="flex flex-col lg:flex-row gap-12">
-          {/* Sidebar Filters */}
-          <div className="w-full lg:w-64 space-y-10">
+        <div className="flex flex-col lg:flex-row gap-16">
+          {/* Minimal Sidebar Filters */}
+          <div className="w-full lg:w-48 space-y-12 sticky top-32 h-fit">
             {/* Categories */}
             <div>
-              <h3 className="font-serif text-lg mb-6 pb-2 border-b border-border">Categorias</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="cat-all" 
-                    checked={selectedCategory === 'all'}
-                    onCheckedChange={() => setSelectedCategory('all')}
-                  />
-                  <label htmlFor="cat-all" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
-                    Todas
-                  </label>
-                </div>
+              <h3 className="font-mono text-xs uppercase tracking-widest mb-6 text-muted-foreground">Filter By</h3>
+              <div className="space-y-4">
+                <button 
+                  onClick={() => setSelectedCategory('all')}
+                  className={`block font-display text-lg hover:text-muted-foreground transition-colors ${selectedCategory === 'all' ? 'text-foreground underline decoration-1 underline-offset-4' : 'text-muted-foreground'}`}
+                >
+                  All Items
+                </button>
                 {categories.map(cat => (
-                  <div key={cat.id} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`cat-${cat.id}`} 
-                      checked={selectedCategory === cat.id}
-                      onCheckedChange={() => setSelectedCategory(cat.id)}
-                    />
-                    <label htmlFor={`cat-${cat.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
-                      {cat.name}
-                    </label>
-                  </div>
+                  <button 
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`block font-display text-lg hover:text-muted-foreground transition-colors capitalize ${selectedCategory === cat.id ? 'text-foreground underline decoration-1 underline-offset-4' : 'text-muted-foreground'}`}
+                  >
+                    {cat.name}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Price Filter */}
+            {/* Price Filter - Minimal */}
             <div>
-              <h3 className="font-serif text-lg mb-6 pb-2 border-b border-border">Preço</h3>
+              <h3 className="font-mono text-xs uppercase tracking-widest mb-6 text-muted-foreground">Price Range</h3>
               <div className="space-y-6">
                 <Slider 
                   defaultValue={[0, 50000]} 
@@ -78,57 +74,61 @@ export default function Shop() {
                   onValueChange={setPriceRange}
                   className="py-4"
                 />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>R$ {priceRange[0]}</span>
-                  <span>R$ {priceRange[1]}+</span>
+                <div className="flex justify-between font-mono text-xs">
+                  <span>0</span>
+                  <span>50k+</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Product Grid */}
+          {/* Modern Masonry Grid */}
           <div className="flex-1">
-            <div className="mb-6 text-sm text-muted-foreground">
-              Mostrando {filteredProducts.length} resultados
-            </div>
-
             {filteredProducts.length === 0 ? (
-              <div className="text-center py-20 bg-secondary/20">
-                <p className="text-lg font-serif mb-4">Nenhum produto encontrado.</p>
-                <Button variant="outline" onClick={() => {
+              <div className="py-20 text-center border-t border-b border-border">
+                <p className="font-display text-2xl mb-4">No artifacts found.</p>
+                <Button variant="link" onClick={() => {
                   setSelectedCategory('all');
                   setPriceRange([0, 50000]);
-                }}>
-                  Limpar Filtros
+                }} className="font-mono text-xs uppercase tracking-widest">
+                  Clear Filters
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                {filteredProducts.map((product) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-16">
+                {filteredProducts.map((product, idx) => (
                   <motion.div 
                     layout
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    initial={{ opacity: 0, y: 20 }} 
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
                     key={product.id} 
-                    className="group"
+                    className="group cursor-pointer"
                   >
-                    <Link href={`/product/${product.id}`} className="block">
-                      <div className="relative aspect-square bg-white mb-4 overflow-hidden">
+                    <Link href={`/product/${product.id}`}>
+                      <div className="relative aspect-[3/4] bg-secondary overflow-hidden mb-6">
                         <img 
                           src={product.image} 
                           alt={product.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-white/90 backdrop-blur-sm">
-                          <Button className="w-full rounded-none bg-black text-white hover:bg-primary uppercase text-xs tracking-widest">
-                            Ver Detalhes
-                          </Button>
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                        
+                        {/* Hover Overlay Button */}
+                        <div className="absolute bottom-0 left-0 w-full p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                           <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white py-3 px-4 flex justify-between items-center">
+                             <span className="font-mono text-xs uppercase tracking-widest">View Details</span>
+                             <ArrowRight className="h-3 w-3" />
+                           </div>
                         </div>
                       </div>
-                      <div className="text-center">
-                        <h3 className="font-serif text-lg text-foreground group-hover:text-primary transition-colors">{product.name}</h3>
-                        <p className="text-muted-foreground mt-1">R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                      
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-display text-xl leading-none mb-2 group-hover:underline underline-offset-4 decoration-1">{product.name}</h3>
+                          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">{product.collection}</span>
+                        </div>
+                        <p className="font-mono text-sm">R$ {product.price.toLocaleString('pt-BR')}</p>
                       </div>
                     </Link>
                   </motion.div>

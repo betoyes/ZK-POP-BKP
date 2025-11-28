@@ -18,93 +18,71 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Shop', href: '/shop' },
-    { name: 'Collections', href: '/collections' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
-  ];
+  const isHome = location === '/';
 
   return (
     <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled || location !== '/' 
-          ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-sm py-4' 
-          : 'bg-transparent py-6'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 mix-blend-difference text-white ${
+        isScrolled ? 'py-4' : 'py-8'
       }`}
     >
-      <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
-        {/* Mobile Menu */}
-        <div className="md:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-foreground">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="bg-background border-r border-border w-[300px]">
-              <div className="flex flex-col gap-8 mt-10">
-                <span className="font-serif text-2xl font-bold tracking-widest text-primary">AURUM</span>
-                <div className="flex flex-col gap-4">
-                  {navLinks.map((link) => (
-                    <Link key={link.name} href={link.href} className="text-lg font-medium hover:text-primary transition-colors">
-                      {link.name}
-                    </Link>
-                  ))}
-                  <Link href="/admin" className="text-lg font-medium text-muted-foreground hover:text-primary transition-colors">
-                    Admin Panel
-                  </Link>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+      <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
+        {/* Logo - Left Aligned for Modern Feel */}
+        <div className="z-50">
+          <Link href="/" className="font-display text-2xl md:text-3xl font-bold tracking-tighter hover:opacity-70 transition-opacity">
+            AURUM®
+          </Link>
         </div>
 
-        {/* Desktop Links - Left */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.slice(0, 3).map((link) => (
-            <Link key={link.name} href={link.href} className="text-sm font-medium tracking-wide hover:text-primary transition-colors uppercase">
-              {link.name}
+        {/* Desktop Links - Center / Hidden on Mobile */}
+        <div className="hidden md:flex items-center gap-12 absolute left-1/2 -translate-x-1/2">
+          {['Shop', 'Collections', 'About'].map((item) => (
+            <Link key={item} href={`/${item.toLowerCase()}`} className="text-sm font-mono tracking-widest hover:underline underline-offset-4 uppercase">
+              {item}
             </Link>
           ))}
         </div>
 
-        {/* Logo - Center */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <Link href="/" className="font-serif text-3xl md:text-4xl font-bold tracking-widest text-primary hover:opacity-90 transition-opacity">
-            AURUM
-          </Link>
-        </div>
-
-        {/* Desktop Links - Right & Icons */}
-        <div className="flex items-center gap-4 md:gap-6">
-          <div className="hidden md:flex items-center gap-8 mr-4">
-            {navLinks.slice(3).map((link) => (
-              <Link key={link.name} href={link.href} className="text-sm font-medium tracking-wide hover:text-primary transition-colors uppercase">
-                {link.name}
-              </Link>
-            ))}
+        {/* Right Actions */}
+        <div className="flex items-center gap-6 z-50">
+          <div className="hidden md:block font-mono text-xs tracking-widest">
+            EST. 2025
           </div>
-
-          <Button variant="ghost" size="icon" className="hover:text-primary">
-            <Search className="h-5 w-5" />
-          </Button>
           
-          <Link href="/cart">
-            <Button variant="ghost" size="icon" className="hover:text-primary relative">
-              <ShoppingBag className="h-5 w-5" />
-              <span className="absolute top-0 right-0 h-2 w-2 bg-primary rounded-full"></span>
-            </Button>
-          </Link>
-          
-          <Link href="/admin">
-             <Button variant="ghost" size="icon" className="hover:text-primary">
-              <User className="h-5 w-5" />
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/cart">
+              <button className="hover:opacity-70 transition-opacity font-mono text-sm flex items-center gap-2">
+                BAG (0)
+              </button>
+            </Link>
+            
+            {/* Mobile Menu */}
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-current p-0 hover:bg-transparent">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="bg-black text-white border-l-white/10 w-full sm:w-[400px] p-0">
+                  <div className="flex flex-col h-full p-8 justify-between">
+                    <div className="space-y-8 mt-20">
+                      {['Home', 'Shop', 'Collections', 'About', 'Contact'].map((item) => (
+                        <Link key={item} href={item === 'Home' ? '/' : `/${item.toLowerCase()}`} className="block font-display text-5xl md:text-6xl font-medium hover:text-white/50 transition-colors tracking-tighter">
+                          {item}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="font-mono text-xs tracking-widest text-white/50">
+                      AURUM JEWELRY © 2025
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
         </div>
       </div>
     </motion.nav>
