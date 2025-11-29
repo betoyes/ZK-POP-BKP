@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import { useProducts } from '@/context/ProductContext';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BookOpen, Package, DollarSign, Users, TrendingUp, Edit, Trash, Plus, Search, LayoutGrid, Tags, ShoppingCart } from 'lucide-react';
+import { BookOpen, Package, DollarSign, Users, TrendingUp, Edit, Trash, Plus, Search, LayoutGrid, Tags, ShoppingCart, Download } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -315,6 +315,33 @@ export default function Dashboard() {
   const handleSaveBranding = () => {
     updateBranding(brandingForm);
     toast({ title: "Sucesso", description: "Branding atualizado com sucesso" });
+  };
+
+  const downloadCSV = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadCustomers = () => {
+    const csvContent = [
+      "ID,Nome,Email,Pedidos,Total Gasto,Ultima Compra",
+      ...customers.map(c => `${c.id},"${c.name}",${c.email},${c.orders},${c.totalSpent},${c.lastOrder}`)
+    ].join('\n');
+    downloadCSV(csvContent, 'clientes.csv');
+  };
+
+  const handleDownloadSubscribers = () => {
+    const csvContent = [
+      "ID,Email,Data,Status",
+      ...subscribers.map(s => `${s.id},${s.email},${s.date},${s.status}`)
+    ].join('\n');
+    downloadCSV(csvContent, 'newsletter.csv');
   };
 
   return (
@@ -843,6 +870,11 @@ export default function Dashboard() {
 
           {/* CUSTOMERS TAB */}
           <TabsContent value="customers" className="space-y-6">
+             <div className="flex justify-end">
+               <Button onClick={handleDownloadCustomers} variant="outline" className="rounded-none border-black text-black hover:bg-black hover:text-white uppercase tracking-widest font-mono text-xs px-6 h-10 flex gap-2">
+                 <Download className="h-4 w-4" /> Exportar CSV
+               </Button>
+             </div>
              <div className="border border-border bg-card">
               <Table>
                 <TableHeader>
@@ -993,6 +1025,11 @@ export default function Dashboard() {
 
           {/* NEWSLETTER TAB */}
           <TabsContent value="newsletter" className="space-y-6">
+             <div className="flex justify-end">
+               <Button onClick={handleDownloadSubscribers} variant="outline" className="rounded-none border-black text-black hover:bg-black hover:text-white uppercase tracking-widest font-mono text-xs px-6 h-10 flex gap-2">
+                 <Download className="h-4 w-4" /> Exportar CSV
+               </Button>
+             </div>
              <div className="border border-border bg-card">
               <Table>
                 <TableHeader>
