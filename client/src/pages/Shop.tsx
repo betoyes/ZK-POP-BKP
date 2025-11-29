@@ -210,9 +210,16 @@ export default function Shop() {
                         <img 
                           src={product.image} 
                           alt={product.name}
-                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale group-hover:grayscale-0"
+                          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${(!product.imageColor || product.image === product.imageColor) ? 'grayscale group-hover:grayscale-0' : ''}`}
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                        {product.imageColor && product.image !== product.imageColor && (
+                          <img 
+                            src={product.imageColor} 
+                            alt={product.name}
+                            className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-0 group-hover:opacity-100"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
                         
                         {/* Hover Overlay Button */}
                         <div className="absolute bottom-0 left-0 w-full p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">

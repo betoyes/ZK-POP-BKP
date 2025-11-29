@@ -190,9 +190,16 @@ export default function Home() {
                   <img 
                     src={product.image} 
                     alt={product.name}
-                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:grayscale-0 grayscale"
+                    className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${(!product.imageColor || product.image === product.imageColor) ? 'grayscale group-hover:grayscale-0' : ''}`}
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                  {product.imageColor && product.image !== product.imageColor && (
+                    <img 
+                      src={product.imageColor} 
+                      alt={product.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 opacity-0 group-hover:opacity-100"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
                 </div>
                 <div className="flex justify-between items-start border-b border-border pb-2 group-hover:border-black transition-colors">
                   <div>
