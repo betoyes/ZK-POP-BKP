@@ -126,7 +126,7 @@ export default function Home() {
           <div className="space-y-6">
             <h1 className="font-display text-[12vw] leading-[0.8] font-bold tracking-tighter uppercase">
               {branding.heroTitle.split('\n').map((line, i) => (
-                <span key={i} className="block" style={{ marginLeft: i > 0 ? `${i * 10}vw` : 0 }}>
+                <span key={i} className="block">
                   {line}
                 </span>
               ))}
