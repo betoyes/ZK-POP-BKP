@@ -264,9 +264,13 @@ export default function Dashboard() {
     : subscribers.filter(s => s.type === subscriberFilter);
   
   // Get subscriber type counts
+  // Newsletter = ALL (everyone is part of newsletter)
+  // "Apenas Inscritos" = footer signups only (type='newsletter')
+  // Leads = registered but no purchase
+  // Clientes = made a purchase
   const subscriberCounts = {
-    all: subscribers.length,
-    newsletter: subscribers.filter(s => s.type === 'newsletter' || !s.type).length,
+    all: subscribers.length, // "Newsletter" - everyone
+    newsletter: subscribers.filter(s => s.type === 'newsletter' || !s.type).length, // "Apenas Inscritos"
     lead: subscribers.filter(s => s.type === 'lead').length,
     customer: subscribers.filter(s => s.type === 'customer').length,
   };
@@ -278,7 +282,7 @@ export default function Dashboard() {
       case 'lead':
         return <span className="px-2 py-1 text-[10px] bg-amber-500 text-white">Lead</span>;
       default:
-        return <span className="px-2 py-1 text-[10px] bg-gray-600 text-white">Newsletter</span>;
+        return <span className="px-2 py-1 text-[10px] bg-gray-600 text-white">Inscrito</span>;
     }
   };
 
@@ -1303,7 +1307,7 @@ export default function Dashboard() {
                  className={`rounded-none font-mono text-xs ${subscriberFilter === 'all' ? 'bg-black text-white' : 'border-black'}`}
                  data-testid="filter-all-subscribers"
                >
-                 Todos ({subscriberCounts.all})
+                 📧 Newsletter ({subscriberCounts.all})
                </Button>
                <Button 
                  variant={subscriberFilter === 'newsletter' ? 'default' : 'outline'}
@@ -1312,7 +1316,7 @@ export default function Dashboard() {
                  className={`rounded-none font-mono text-xs ${subscriberFilter === 'newsletter' ? 'bg-gray-600 text-white' : 'border-gray-600'}`}
                  data-testid="filter-newsletter-subscribers"
                >
-                 Newsletter ({subscriberCounts.newsletter})
+                 Apenas Inscritos ({subscriberCounts.newsletter})
                </Button>
                <Button 
                  variant={subscriberFilter === 'lead' ? 'default' : 'outline'}
