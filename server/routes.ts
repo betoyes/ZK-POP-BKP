@@ -13,7 +13,7 @@ import {
   insertCustomerSchema, insertOrderSchema, insertBrandingSchema,
   type User,
 } from "@shared/schema";
-import { sendPasswordResetEmail } from "./email";
+import { sendPasswordResetEmail, sendAdminNotification } from "./email";
 import { validatePassword, isPasswordValid } from "../shared/passwordStrength";
 
 // Extend Express User type

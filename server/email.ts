@@ -102,6 +102,115 @@ export async function sendVerificationEmail(to: string, token: string, baseUrl: 
   }
 }
 
+// Notification email for admin when new leads/customers register
+export async function sendAdminNotification(
+  type: 'newsletter' | 'lead' | 'customer' | 'order',
+  data: { name?: string; email?: string; total?: number; orderId?: string; items?: number }
+) {
+  const adminEmail = 'betoyes@gmail.com';
+  
+  try {
+    const { client, fromEmail } = await getResendClient();
+    
+    let subject = '';
+    let heading = '';
+    let details = '';
+    
+    switch (type) {
+      case 'newsletter':
+        subject = '🆕 Novo inscrito na Newsletter - ZK REZK';
+        heading = 'Nova inscrição na Newsletter';
+        details = `
+          <p><strong>Email:</strong> ${data.email}</p>
+          ${data.name ? `<p><strong>Nome:</strong> ${data.name}</p>` : ''}
+        `;
+        break;
+      case 'lead':
+        subject = '🎯 Novo Lead Registrado - ZK REZK';
+        heading = 'Novo cadastro no site';
+        details = `
+          <p><strong>Email:</strong> ${data.email}</p>
+          ${data.name ? `<p><strong>Nome:</strong> ${data.name}</p>` : ''}
+          <p><strong>Tipo:</strong> Lead (registrou-se mas ainda não comprou)</p>
+        `;
+        break;
+      case 'customer':
+        subject = '🛍️ Novo Cliente Cadastrado - ZK REZK';
+        heading = 'Novo cliente no sistema';
+        details = `
+          <p><strong>Nome:</strong> ${data.name || 'Não informado'}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          <p><strong>Tipo:</strong> Cliente</p>
+        `;
+        break;
+      case 'order':
+        subject = '💰 Nova Venda Realizada - ZK REZK';
+        heading = 'Nova venda no site!';
+        const totalFormatted = data.total ? (data.total / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A';
+        details = `
+          <p><strong>Pedido:</strong> ${data.orderId || 'N/A'}</p>
+          <p><strong>Cliente:</strong> ${data.name || 'Não informado'}</p>
+          <p><strong>Email:</strong> ${data.email || 'N/A'}</p>
+          <p><strong>Total:</strong> ${totalFormatted}</p>
+          <p><strong>Itens:</strong> ${data.items || 0}</p>
+        `;
+        break;
+    }
+    
+    const result = await client.emails.send({
+      from: fromEmail || 'ZK REZK <onboarding@resend.dev>',
+      to: [adminEmail],
+      subject,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 40px 20px; }
+              .container { max-width: 500px; margin: 0 auto; background: #fff; border: 1px solid #e0e0e0; }
+              .header { background: #000; color: #fff; padding: 30px; text-align: center; }
+              .header h1 { margin: 0; font-size: 24px; letter-spacing: 4px; font-weight: 400; }
+              .content { padding: 40px 30px; }
+              .content h2 { font-size: 20px; font-weight: 400; margin-bottom: 20px; text-align: center; }
+              .content p { color: #333; font-size: 14px; line-height: 1.8; margin-bottom: 10px; }
+              .content strong { color: #000; }
+              .badge { display: inline-block; padding: 8px 16px; background: ${type === 'order' ? '#22c55e' : type === 'customer' ? '#3b82f6' : '#f59e0b'}; color: #fff; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+              .footer { padding: 20px 30px; text-align: center; border-top: 1px solid #e0e0e0; }
+              .footer p { color: #999; font-size: 11px; margin: 0; }
+              .timestamp { text-align: center; color: #999; font-size: 11px; margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>ZK REZK</h1>
+              </div>
+              <div class="content">
+                <div style="text-align: center;">
+                  <span class="badge">${type === 'order' ? 'VENDA' : type === 'customer' ? 'CLIENTE' : type === 'lead' ? 'LEAD' : 'NEWSLETTER'}</span>
+                </div>
+                <h2>${heading}</h2>
+                ${details}
+                <p class="timestamp">Data: ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</p>
+              </div>
+              <div class="footer">
+                <p>Notificação automática do sistema ZK REZK</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `
+    });
+    
+    console.log(`[Email] Admin notification sent for ${type}:`, result);
+    return result;
+  } catch (error) {
+    console.error(`[Email] Failed to send admin notification for ${type}:`, error);
+    // Don't throw - notifications should fail silently
+  }
+}
+
 export async function sendPasswordResetEmail(to: string, token: string, baseUrl: string) {
   const { client, fromEmail } = await getResendClient();
   const resetUrl = `${baseUrl}/reset-password?token=${token}`;
