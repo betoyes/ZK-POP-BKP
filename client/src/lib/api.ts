@@ -18,7 +18,10 @@ class APIClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      throw new Error(error.message || `HTTP ${response.status}`);
+      const errorObj: any = new Error(error.message || `HTTP ${response.status}`);
+      errorObj.needsVerification = error.needsVerification;
+      errorObj.email = error.email;
+      throw errorObj;
     }
 
     // Handle 204 No Content

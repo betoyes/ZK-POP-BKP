@@ -57,6 +57,10 @@ Preferred communication style: Simple, everyday language.
 - Role-based middleware (`requireAuth`, `requireAdmin`) for route protection
 - Separate admin and customer user roles in the same users table
 - Password hashing with bcrypt (10 rounds)
+- Email verification required for customer accounts before login
+- Password reset via secure email tokens (1-hour expiry)
+- Email verification tokens (24-hour expiry)
+- Resend integration for transactional emails
 
 **API Design**
 - RESTful endpoints under `/api` namespace
@@ -91,7 +95,7 @@ Preferred communication style: Simple, everyday language.
 ### Data Schema
 
 **Core Entities**
-- **Users**: Authentication (admin/customer roles)
+- **Users**: Authentication (admin/customer roles) with emailVerified flag
 - **Categories**: Product categorization (rings, necklaces, earrings, bracelets)
 - **Collections**: Curated product groupings (Eternal, Aurora, etc.)
 - **Products**: Jewelry items with pricing, images, specs, bestseller/new flags
@@ -100,6 +104,8 @@ Preferred communication style: Simple, everyday language.
 - **Customers**: Extended customer profiles (separate from users)
 - **Orders**: Purchase records with status tracking
 - **Branding**: Configurable site content (hero text, manifesto, company name)
+- **EmailVerificationTokens**: Tokens for email confirmation (24-hour expiry)
+- **PasswordResetTokens**: Tokens for password recovery (1-hour expiry, single-use)
 
 **Schema Design Decisions**
 - Relational structure with foreign keys (categoryId, collectionId on products)

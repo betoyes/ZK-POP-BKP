@@ -1,6 +1,6 @@
 import {
   users, categories, collections, products, journalPosts, subscribers,
-  customers, orders, branding,
+  customers, orders, branding, emailVerificationTokens, passwordResetTokens,
   type User, type InsertUser,
   type Category, type InsertCategory,
   type Collection, type InsertCollection,
@@ -10,9 +10,11 @@ import {
   type Customer, type InsertCustomer,
   type Order, type InsertOrder,
   type Branding, type InsertBranding,
+  type EmailVerificationToken, type InsertEmailVerificationToken,
+  type PasswordResetToken, type InsertPasswordResetToken,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, isNotNull, asc } from "drizzle-orm";
+import { eq, desc, isNotNull, asc, and, gt } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -80,6 +82,19 @@ export interface IStorage {
   // Branding
   getBranding(): Promise<Branding | undefined>;
   createOrUpdateBranding(branding: InsertBranding): Promise<Branding>;
+
+  // Email Verification Tokens
+  createEmailVerificationToken(token: InsertEmailVerificationToken): Promise<EmailVerificationToken>;
+  getEmailVerificationToken(token: string): Promise<EmailVerificationToken | undefined>;
+  deleteEmailVerificationTokensByUserId(userId: number): Promise<void>;
+  verifyUserEmail(userId: number): Promise<void>;
+
+  // Password Reset Tokens
+  createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken>;
+  getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
+  markPasswordResetTokenUsed(id: number): Promise<void>;
+  deletePasswordResetTokensByUserId(userId: number): Promise<void>;
+  updateUserPassword(userId: number, hashedPassword: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -320,6 +335,53 @@ export class DatabaseStorage implements IStorage {
       const [created] = await db.insert(branding).values(brandingData).returning();
       return created;
     }
+  }
+
+  // Email Verification Tokens
+  async createEmailVerificationToken(token: InsertEmailVerificationToken): Promise<EmailVerificationToken> {
+    const [created] = await db.insert(emailVerificationTokens).values(token).returning();
+    return created;
+  }
+
+  async getEmailVerificationToken(token: string): Promise<EmailVerificationToken | undefined> {
+    const [tokenData] = await db.select().from(emailVerificationTokens)
+      .where(eq(emailVerificationTokens.token, token));
+    return tokenData || undefined;
+  }
+
+  async deleteEmailVerificationTokensByUserId(userId: number): Promise<void> {
+    await db.delete(emailVerificationTokens).where(eq(emailVerificationTokens.userId, userId));
+  }
+
+  async verifyUserEmail(userId: number): Promise<void> {
+    await db.update(users).set({ emailVerified: true }).where(eq(users.id, userId));
+  }
+
+  // Password Reset Tokens
+  async createPasswordResetToken(token: InsertPasswordResetToken): Promise<PasswordResetToken> {
+    const [created] = await db.insert(passwordResetTokens).values(token).returning();
+    return created;
+  }
+
+  async getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined> {
+    const [tokenData] = await db.select().from(passwordResetTokens)
+      .where(and(
+        eq(passwordResetTokens.token, token),
+        eq(passwordResetTokens.used, false)
+      ));
+    return tokenData || undefined;
+  }
+
+  async markPasswordResetTokenUsed(id: number): Promise<void> {
+    await db.update(passwordResetTokens).set({ used: true }).where(eq(passwordResetTokens.id, id));
+  }
+
+  async deletePasswordResetTokensByUserId(userId: number): Promise<void> {
+    await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, userId));
+  }
+
+  async updateUserPassword(userId: number, hashedPassword: string): Promise<void> {
+    await db.update(users).set({ password: hashedPassword }).where(eq(users.id, userId));
   }
 }
 

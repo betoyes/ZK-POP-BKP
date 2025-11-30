@@ -5,6 +5,7 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { z } from "zod";
 import {
   insertUserSchema, insertCategorySchema, insertCollectionSchema,
@@ -12,6 +13,7 @@ import {
   insertCustomerSchema, insertOrderSchema, insertBrandingSchema,
   type User,
 } from "@shared/schema";
+import { sendVerificationEmail, sendPasswordResetEmail } from "./email";
 
 // Extend Express User type
 declare global {
@@ -101,7 +103,7 @@ export async function registerRoutes(
 
   // ============ AUTH ROUTES ============
   
-  // Customer registration endpoint
+  // Customer registration endpoint with email verification
   app.post("/api/auth/register", async (req, res, next) => {
     try {
       const { username, password } = req.body;
@@ -126,26 +128,234 @@ export async function registerRoutes(
         password: hashedPassword,
         role: 'customer',
       });
+
+      // Create email verification token
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24 hours
+      
+      await storage.createEmailVerificationToken({
+        userId: user.id,
+        token: verificationToken,
+        expiresAt,
+        createdAt: new Date().toISOString(),
+      });
+
+      // Send verification email
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      try {
+        await sendVerificationEmail(username, verificationToken, baseUrl);
+      } catch (emailErr) {
+        console.error("Failed to send verification email:", emailErr);
+        // Continue registration even if email fails
+      }
       
       res.status(201).json({
         id: user.id,
         username: user.username,
         role: user.role,
+        emailVerified: false,
+        message: "Cadastro realizado! Verifique seu email para confirmar sua conta.",
       });
     } catch (err) {
       next(err);
     }
   });
 
+  // Email verification endpoint
+  app.get("/api/auth/verify-email", async (req, res, next) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ message: "Token de verificação inválido" });
+      }
+      
+      const tokenData = await storage.getEmailVerificationToken(token);
+      
+      if (!tokenData) {
+        return res.status(400).json({ message: "Token de verificação inválido ou expirado" });
+      }
+      
+      // Check if token is expired
+      if (new Date(tokenData.expiresAt) < new Date()) {
+        await storage.deleteEmailVerificationTokensByUserId(tokenData.userId);
+        return res.status(400).json({ message: "Token de verificação expirado. Por favor, solicite um novo email de verificação." });
+      }
+      
+      // Verify the email
+      await storage.verifyUserEmail(tokenData.userId);
+      await storage.deleteEmailVerificationTokensByUserId(tokenData.userId);
+      
+      res.json({ message: "Email verificado com sucesso! Você já pode fazer login." });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Resend verification email
+  app.post("/api/auth/resend-verification", async (req, res, next) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email é obrigatório" });
+      }
+      
+      const user = await storage.getUserByUsername(email);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email já foi verificado" });
+      }
+      
+      // Delete old tokens
+      await storage.deleteEmailVerificationTokensByUserId(user.id);
+      
+      // Create new verification token
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      
+      await storage.createEmailVerificationToken({
+        userId: user.id,
+        token: verificationToken,
+        expiresAt,
+        createdAt: new Date().toISOString(),
+      });
+      
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      await sendVerificationEmail(email, verificationToken, baseUrl);
+      
+      res.json({ message: "Email de verificação reenviado com sucesso" });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Request password reset
+  app.post("/api/auth/forgot-password", async (req, res, next) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email é obrigatório" });
+      }
+      
+      const user = await storage.getUserByUsername(email);
+      if (!user) {
+        // Return success even if user doesn't exist (security best practice)
+        return res.json({ message: "Se o email existir em nossa base, você receberá um link de recuperação." });
+      }
+      
+      // Delete old reset tokens
+      await storage.deletePasswordResetTokensByUserId(user.id);
+      
+      // Create new reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+      
+      await storage.createPasswordResetToken({
+        userId: user.id,
+        token: resetToken,
+        expiresAt,
+        createdAt: new Date().toISOString(),
+      });
+      
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      try {
+        await sendPasswordResetEmail(email, resetToken, baseUrl);
+      } catch (emailErr) {
+        console.error("Failed to send password reset email:", emailErr);
+      }
+      
+      res.json({ message: "Se o email existir em nossa base, você receberá um link de recuperação." });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Validate reset token
+  app.get("/api/auth/validate-reset-token", async (req, res, next) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ valid: false, message: "Token inválido" });
+      }
+      
+      const tokenData = await storage.getPasswordResetToken(token);
+      
+      if (!tokenData) {
+        return res.status(400).json({ valid: false, message: "Token inválido ou já utilizado" });
+      }
+      
+      if (new Date(tokenData.expiresAt) < new Date()) {
+        return res.status(400).json({ valid: false, message: "Token expirado" });
+      }
+      
+      res.json({ valid: true });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Reset password
+  app.post("/api/auth/reset-password", async (req, res, next) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token e nova senha são obrigatórios" });
+      }
+      
+      if (password.length < 6) {
+        return res.status(400).json({ message: "A senha deve ter pelo menos 6 caracteres" });
+      }
+      
+      const tokenData = await storage.getPasswordResetToken(token);
+      
+      if (!tokenData) {
+        return res.status(400).json({ message: "Token inválido ou já utilizado" });
+      }
+      
+      if (new Date(tokenData.expiresAt) < new Date()) {
+        return res.status(400).json({ message: "Token expirado. Por favor, solicite um novo link de recuperação." });
+      }
+      
+      // Update password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await storage.updateUserPassword(tokenData.userId, hashedPassword);
+      
+      // Mark token as used
+      await storage.markPasswordResetTokenUsed(tokenData.id);
+      
+      res.json({ message: "Senha alterada com sucesso! Você já pode fazer login." });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   // Login
-  app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: Express.User, info: any) => {
+  app.post("/api/auth/login", async (req, res, next) => {
+    passport.authenticate("local", async (err: any, user: Express.User, info: any) => {
       if (err) {
         return next(err);
       }
       if (!user) {
         return res.status(401).json({ message: info?.message || "Credenciais inválidas" });
       }
+      
+      // Check if email is verified (only for customers, admins bypass)
+      const fullUser = await storage.getUser(user.id);
+      if (fullUser && fullUser.role === 'customer' && !fullUser.emailVerified) {
+        return res.status(403).json({ 
+          message: "Por favor, confirme seu email antes de fazer login.",
+          needsVerification: true,
+          email: fullUser.username
+        });
+      }
+      
       req.logIn(user, (err) => {
         if (err) {
           return next(err);
