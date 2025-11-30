@@ -33,6 +33,14 @@ interface AdminUser {
   createdAt?: string;
 }
 
+interface Subscriber {
+  id: number;
+  name: string;
+  email: string;
+  date: string;
+  status: string;
+}
+
 export default function Dashboard() {
   const { 
     products, categories, collections, orders, customers,
@@ -40,8 +48,7 @@ export default function Dashboard() {
     addCategory, deleteCategory,
     addCollection, deleteCollection,
     posts, addPost, deletePost, updatePost,
-    updateOrder, branding, updateBranding,
-    subscribers
+    updateOrder, branding, updateBranding
   } = useProducts();
   const { toast } = useToast();
   const { user, logout } = useAuth();
@@ -49,12 +56,30 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState("overview");
   
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [isAddAdminOpen, setIsAddAdminOpen] = useState(false);
   const [adminFormData, setAdminFormData] = useState({ email: '', password: '', confirmPassword: '' });
   const [isLoadingAdmins, setIsLoadingAdmins] = useState(false);
   
   const isPrimaryAdmin = user?.username === PRIMARY_ADMIN_EMAIL;
+  
+  // Fetch subscribers from API
+  const fetchSubscribers = async () => {
+    try {
+      const response = await fetch('/api/subscribers', { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        setSubscribers(data);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar assinantes:', err);
+    }
+  };
+  
+  useEffect(() => {
+    fetchSubscribers();
+  }, []);
   
   useEffect(() => {
     if (isPrimaryAdmin && activeTab === 'admins') {
@@ -482,7 +507,7 @@ export default function Dashboard() {
       toast({ title: "Sucesso", description: "Assinante adicionado com sucesso" });
       setSubscriberFormData({ name: '', email: '' });
       setIsAddSubscriberOpen(false);
-      window.location.reload();
+      fetchSubscribers();
     } catch (err: any) {
       toast({ title: "Erro", description: err.message || "Não foi possível adicionar assinante", variant: "destructive" });
     }
@@ -497,7 +522,7 @@ export default function Dashboard() {
         throw new Error('Não foi possível remover assinante');
       }
       toast({ title: "Sucesso", description: "Assinante removido" });
-      window.location.reload();
+      fetchSubscribers();
     } catch (err: any) {
       toast({ title: "Erro", description: err.message, variant: "destructive" });
     }
@@ -537,7 +562,7 @@ export default function Dashboard() {
       toast({ title: "Importação Concluída", description: data.message });
       setImportText('');
       setIsImportOpen(false);
-      window.location.reload();
+      fetchSubscribers();
     } catch (err: any) {
       toast({ title: "Erro", description: err.message || "Erro na importação", variant: "destructive" });
     } finally {

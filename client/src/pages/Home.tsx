@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { testimonials } from '@/lib/mockData';
 
 export default function Home() {
-  const { products, branding, addSubscriber } = useProducts();
+  const { products, branding } = useProducts();
   const { toast } = useToast();
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
@@ -24,14 +24,39 @@ export default function Home() {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [email, setEmail] = useState('');
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!email || !email.includes('@')) {
       toast({ title: "Erro", description: "Por favor, insira um email válido.", variant: "destructive" });
       return;
     }
-    addSubscriber(email);
-    setEmail('');
-    toast({ title: "Bem-vindo(a)", description: "Você foi adicionado(a) à nossa lista exclusiva." });
+    
+    try {
+      const response = await fetch('/api/subscribers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: email.split('@')[0],
+          email: email.toLowerCase(),
+          date: new Date().toISOString().split('T')[0],
+          status: 'active'
+        })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        if (error.message?.includes('cadastrado')) {
+          toast({ title: "Atenção", description: "Este email já está cadastrado.", variant: "default" });
+        } else {
+          throw new Error(error.message);
+        }
+        return;
+      }
+      
+      setEmail('');
+      toast({ title: "Bem-vindo(a)", description: "Você foi adicionado(a) à nossa lista exclusiva." });
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message || "Não foi possível cadastrar. Tente novamente.", variant: "destructive" });
+    }
   };
   
   // Autoplay plugin configuration
