@@ -1,24 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product, products as initialProducts, Category, categories as initialCategories, Collection, collections as initialCollections, Branding, initialBranding, JournalPost, initialPosts } from '@/lib/mockData';
 import ringImage from '@assets/generated_images/diamond_ring_product_shot.png';
-
-// Mock initial orders
-const initialOrders = [
-  { id: 'ORD-001', customer: 'Maria Silva', date: '2026-11-28', status: 'Entregue', total: 12500, items: 1 },
-  { id: 'ORD-002', customer: 'João Santos', date: '2026-11-27', status: 'Processando', total: 4200, items: 1 },
-  { id: 'ORD-003', customer: 'Ana Oliveira', date: '2026-11-26', status: 'Enviado', total: 8900, items: 2 },
-  { id: 'ORD-004', customer: 'Carlos Lima', date: '2026-11-25', status: 'Cancelado', total: 3800, items: 1 },
-  { id: 'ORD-005', customer: 'Beatriz Costa', date: '2026-11-24', status: 'Entregue', total: 25000, items: 3 },
-];
-
-// Mock initial customers
-const initialCustomers = [
-  { id: 'CUST-001', name: 'Maria Silva', email: 'maria@email.com', orders: 5, totalSpent: 45000, lastOrder: '2026-11-28' },
-  { id: 'CUST-002', name: 'João Santos', email: 'joao@email.com', orders: 2, totalSpent: 8400, lastOrder: '2026-11-27' },
-  { id: 'CUST-003', name: 'Ana Oliveira', email: 'ana@email.com', orders: 3, totalSpent: 15600, lastOrder: '2026-11-26' },
-  { id: 'CUST-004', name: 'Carlos Lima', email: 'carlos@email.com', orders: 1, totalSpent: 3800, lastOrder: '2026-11-25' },
-  { id: 'CUST-005', name: 'Beatriz Costa', email: 'bia@email.com', orders: 8, totalSpent: 82000, lastOrder: '2026-11-24' },
-];
 
 interface ProductContextType {
   products: Product[];
@@ -55,11 +37,21 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [collections, setCollections] = useState<Collection[]>(initialCollections);
-  const [orders, setOrders] = useState(initialOrders);
-  const [customers] = useState(initialCustomers);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [customers] = useState<any[]>([]);
   const [posts, setPosts] = useState<JournalPost[]>(initialPosts);
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [branding, setBranding] = useState<Branding>(initialBranding);
+
+  // Load data from server on mount
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/products').then(r => r.json()).then(data => setProducts(data || [])).catch(() => setProducts([])),
+      fetch('/api/categories').then(r => r.json()).then(data => setCategories(data || [])).catch(() => setCategories([])),
+      fetch('/api/collections').then(r => r.json()).then(data => setCollections(data || [])).catch(() => setCollections([])),
+      fetch('/api/journal').then(r => r.json()).then(data => setPosts(data || [])).catch(() => setPosts([])),
+    ]).catch(err => console.error('Failed to load initial data:', err));
+  }, []);
 
   // Branding
   const updateBranding = (newBranding: Partial<Branding>) => {
