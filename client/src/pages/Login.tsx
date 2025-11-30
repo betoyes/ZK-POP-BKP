@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Info } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { ArrowRight } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -16,8 +17,10 @@ const formSchema = z.object({
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { login, isAuthenticated } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -27,34 +30,52 @@ export default function Login() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Demo Login Logic
-    if (isLogin && values.email === "cliente@aurum.com" && values.password === "cliente") {
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    setLocation('/account');
+    return null;
+  }
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    try {
+      if (isLogin) {
+        // Try to login with email as username
+        await login(values.email, values.password);
+        toast({
+          title: "Bem-vindo de volta",
+          description: "Login efetuado com sucesso.",
+        });
+        setLocation('/account');
+      } else {
+        // Registration - create new customer account
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: values.email, password: values.password }),
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Erro ao criar conta');
+        }
+        
+        // Auto login after registration
+        await login(values.email, values.password);
+        toast({
+          title: "Conta criada",
+          description: "Bem-vindo ao ZK REZK.",
+        });
+        setLocation('/account');
+      }
+    } catch (error: any) {
       toast({
-        title: "Bem-vindo de volta",
-        description: "Login efetuado com sucesso.",
+        variant: "destructive",
+        title: isLogin ? "Falha no Login" : "Erro no Registro",
+        description: error.message || "Credenciais inválidas.",
       });
-      setTimeout(() => setLocation('/account'), 1000);
-    } else if (isLogin && values.email === "admin@aurum.com" && values.password === "admin") {
-       // Allow admin login from main login page for convenience
-       toast({
-        title: "Acesso Admin Detectado",
-        description: "Redirecionando para o painel...",
-      });
-      setTimeout(() => setLocation('/admin/dashboard'), 1000);
-    } else if (isLogin) {
-      toast({
-         variant: "destructive",
-         title: "Falha no Login",
-         description: "Credenciais inválidas.",
-      });
-    } else {
-      // Mock Registration
-      toast({
-        title: "Conta criada",
-        description: "Bem-vindo ao ZK REZK.",
-      });
-      setTimeout(() => setLocation('/account'), 1000);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -87,18 +108,6 @@ export default function Login() {
             <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest">
               {isLogin ? 'Bem-vindo de volta ao círculo interno.' : 'Junte-se ao ZK REZK Archive.'}
             </p>
-            
-            {/* Demo Credentials Box */}
-            {isLogin && (
-              <div className="mt-6 p-4 bg-secondary/50 border border-border flex gap-3 items-start">
-                <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div className="text-xs font-mono">
-                  <p className="font-bold uppercase tracking-widest mb-1">Acesso Demo</p>
-                  <p>Email: <span className="select-all">cliente@aurum.com</span></p>
-                  <p>Senha: <span className="select-all">cliente</span></p>
-                </div>
-              </div>
-            )}
           </div>
 
           <Form {...form}>
@@ -130,8 +139,8 @@ export default function Login() {
                 )}
               />
               
-              <Button type="submit" className="w-full rounded-none h-12 bg-black text-white hover:bg-black/80 uppercase tracking-widest font-mono text-xs flex justify-between items-center px-6">
-                <span>{isLogin ? 'Acessar Conta' : 'Registrar'}</span>
+              <Button type="submit" disabled={isLoading} className="w-full rounded-none h-12 bg-black text-white hover:bg-black/80 uppercase tracking-widest font-mono text-xs flex justify-between items-center px-6">
+                <span>{isLoading ? 'Aguarde...' : (isLogin ? 'Acessar Conta' : 'Registrar')}</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </form>

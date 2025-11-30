@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { Lock, ShieldAlert } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useState } from 'react';
 
 const formSchema = z.object({
-  username: z.string().min(1, "Usuário obrigatório"),
+  email: z.string().email("Email inválido"),
   password: z.string().min(1, "Senha obrigatória"),
 });
 
@@ -24,7 +24,7 @@ export default function AdminLogin() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -38,7 +38,7 @@ export default function AdminLogin() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await login(values.username, values.password);
+      await login(values.email, values.password);
       toast({
         title: "Acesso concedido",
         description: "Bem-vindo ao painel administrativo",
@@ -68,26 +68,16 @@ export default function AdminLogin() {
           </p>
         </div>
 
-        {/* Demo Credentials */}
-        <div className="mb-8 p-4 border border-white/10 bg-white/5 flex items-start gap-3">
-          <ShieldAlert className="h-5 w-5 text-white/70 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-             <p className="font-mono text-[10px] uppercase tracking-widest text-white/70 font-bold">Credenciais Padrão</p>
-             <p className="font-mono text-xs text-white/50">Usuário: <span className="text-white select-all">admin</span></p>
-             <p className="font-mono text-xs text-white/50">Senha: <span className="text-white select-all">admin123</span></p>
-          </div>
-        </div>
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="username"
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-mono text-xs uppercase tracking-widest text-white/70">Usuário</FormLabel>
+                  <FormLabel className="font-mono text-xs uppercase tracking-widest text-white/70">Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="admin" {...field} className="rounded-none border-white/20 h-12 bg-transparent text-white placeholder:text-white/20 focus:border-white" data-testid="input-username" />
+                    <Input type="email" placeholder="seu@email.com" {...field} className="rounded-none border-white/20 h-12 bg-transparent text-white placeholder:text-white/20 focus:border-white" data-testid="input-email" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
