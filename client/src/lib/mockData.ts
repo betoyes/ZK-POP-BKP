@@ -47,14 +47,15 @@ export interface Branding {
 
 export interface Subscriber {
   id: number;
+  name: string;
   email: string;
   date: string;
   status: 'active' | 'unsubscribed';
 }
 
 export const initialSubscribers: Subscriber[] = [
-  { id: 1, email: 'cliente.vip@exemplo.com', date: '28 Nov 2026', status: 'active' },
-  { id: 2, email: 'newsletter@teste.com', date: '25 Nov 2026', status: 'active' },
+  { id: 1, name: 'Cliente VIP', email: 'cliente.vip@exemplo.com', date: '28 Nov 2026', status: 'active' },
+  { id: 2, name: 'Newsletter', email: 'newsletter@teste.com', date: '25 Nov 2026', status: 'active' },
 ];
 
 export const initialBranding: Branding = {

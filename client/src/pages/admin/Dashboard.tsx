@@ -223,6 +223,13 @@ export default function Dashboard() {
   };
   const [postFormData, setPostFormData] = useState({ title: '', excerpt: '', content: '', category: '', image: '' });
   const [brandingForm, setBrandingForm] = useState(branding);
+  
+  // Newsletter management state
+  const [isAddSubscriberOpen, setIsAddSubscriberOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [subscriberFormData, setSubscriberFormData] = useState({ name: '', email: '' });
+  const [importText, setImportText] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -443,10 +450,99 @@ export default function Dashboard() {
 
   const handleDownloadSubscribers = () => {
     const csvContent = [
-      "ID,Email,Data,Status",
-      ...subscribers.map(s => `${s.id},${s.email},${s.date},${s.status}`)
+      "ID,Nome,Email,Data,Status",
+      ...subscribers.map(s => `${s.id},"${s.name || ''}",${s.email},${s.date},${s.status}`)
     ].join('\n');
     downloadCSV(csvContent, 'newsletter.csv');
+  };
+
+  const handleAddSubscriber = async () => {
+    if (!subscriberFormData.email) {
+      toast({ title: "Erro", description: "Email é obrigatório", variant: "destructive" });
+      return;
+    }
+    
+    try {
+      const response = await fetch('/api/subscribers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: subscriberFormData.name || subscriberFormData.email.split('@')[0],
+          email: subscriberFormData.email.toLowerCase(),
+          date: new Date().toISOString().split('T')[0],
+          status: 'active'
+        })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+      
+      toast({ title: "Sucesso", description: "Assinante adicionado com sucesso" });
+      setSubscriberFormData({ name: '', email: '' });
+      setIsAddSubscriberOpen(false);
+      window.location.reload();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message || "Não foi possível adicionar assinante", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteSubscriber = async (id: number, email: string) => {
+    if (!confirm(`Tem certeza que deseja remover ${email} da lista?`)) return;
+    
+    try {
+      const response = await fetch(`/api/subscribers/${id}`, { method: 'DELETE' });
+      if (!response.ok) {
+        throw new Error('Não foi possível remover assinante');
+      }
+      toast({ title: "Sucesso", description: "Assinante removido" });
+      window.location.reload();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleImportSubscribers = async () => {
+    if (!importText.trim()) {
+      toast({ title: "Erro", description: "Cole a lista de emails", variant: "destructive" });
+      return;
+    }
+    
+    setIsImporting(true);
+    
+    try {
+      const lines = importText.split('\n').filter(line => line.trim());
+      const subscribersList = lines.map(line => {
+        const parts = line.split(',').map(p => p.trim().replace(/"/g, ''));
+        if (parts.length >= 2) {
+          return { name: parts[0], email: parts[1] };
+        } else {
+          return { name: '', email: parts[0] };
+        }
+      }).filter(sub => sub.email && sub.email.includes('@'));
+      
+      const response = await fetch('/api/subscribers/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscribers: subscribersList })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message);
+      }
+      
+      toast({ title: "Importação Concluída", description: data.message });
+      setImportText('');
+      setIsImportOpen(false);
+      window.location.reload();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message || "Erro na importação", variant: "destructive" });
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   return (
@@ -1145,32 +1241,132 @@ export default function Dashboard() {
 
           {/* NEWSLETTER TAB */}
           <TabsContent value="newsletter" className="space-y-6">
-             <div className="flex justify-end">
-               <Button onClick={handleDownloadSubscribers} variant="outline" className="rounded-none border-black text-black hover:bg-black hover:text-white uppercase tracking-widest font-mono text-xs px-6 h-10 flex gap-2">
-                 <Download className="h-4 w-4" /> Exportar CSV
-               </Button>
+             <div className="flex justify-between items-center">
+               <p className="text-muted-foreground font-mono text-xs">{subscribers.length} assinantes</p>
+               <div className="flex gap-3">
+                 <Dialog open={isAddSubscriberOpen} onOpenChange={setIsAddSubscriberOpen}>
+                   <DialogTrigger asChild>
+                     <Button className="rounded-none bg-black text-white hover:bg-black/80 uppercase tracking-widest font-mono text-xs px-6 h-10 flex gap-2" data-testid="button-add-subscriber">
+                       <Plus className="h-4 w-4" /> Adicionar
+                     </Button>
+                   </DialogTrigger>
+                   <DialogContent className="sm:max-w-[400px] bg-background border border-border">
+                     <DialogHeader>
+                       <DialogTitle className="font-display text-2xl">Adicionar Assinante</DialogTitle>
+                     </DialogHeader>
+                     <div className="grid gap-4 py-4">
+                       <div className="grid gap-2">
+                         <Label>Nome</Label>
+                         <Input 
+                           value={subscriberFormData.name} 
+                           onChange={(e) => setSubscriberFormData({...subscriberFormData, name: e.target.value})} 
+                           className="rounded-none"
+                           placeholder="Nome do contato"
+                           data-testid="input-subscriber-name"
+                         />
+                       </div>
+                       <div className="grid gap-2">
+                         <Label>Email *</Label>
+                         <Input 
+                           type="email"
+                           value={subscriberFormData.email} 
+                           onChange={(e) => setSubscriberFormData({...subscriberFormData, email: e.target.value})} 
+                           className="rounded-none"
+                           placeholder="email@exemplo.com"
+                           data-testid="input-subscriber-email"
+                         />
+                       </div>
+                     </div>
+                     <DialogFooter>
+                       <Button onClick={handleAddSubscriber} className="rounded-none w-full bg-black text-white hover:bg-primary uppercase tracking-widest font-mono text-xs" data-testid="button-save-subscriber">Adicionar</Button>
+                     </DialogFooter>
+                   </DialogContent>
+                 </Dialog>
+
+                 <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+                   <DialogTrigger asChild>
+                     <Button variant="outline" className="rounded-none border-black text-black hover:bg-black hover:text-white uppercase tracking-widest font-mono text-xs px-6 h-10 flex gap-2" data-testid="button-import-subscribers">
+                       <UserPlus className="h-4 w-4" /> Importar
+                     </Button>
+                   </DialogTrigger>
+                   <DialogContent className="sm:max-w-[500px] bg-background border border-border">
+                     <DialogHeader>
+                       <DialogTitle className="font-display text-2xl">Importar Lista</DialogTitle>
+                     </DialogHeader>
+                     <div className="grid gap-4 py-4">
+                       <div className="grid gap-2">
+                         <Label>Cole a lista de emails</Label>
+                         <Textarea 
+                           value={importText} 
+                           onChange={(e) => setImportText(e.target.value)} 
+                           className="rounded-none h-48"
+                           placeholder={"Nome, email@exemplo.com\nOutro Nome, outro@email.com\n\nOu apenas:\nemail@exemplo.com\noutro@email.com"}
+                           data-testid="textarea-import-list"
+                         />
+                         <p className="text-[10px] text-muted-foreground">Formato: Nome, Email (um por linha) ou apenas Email</p>
+                       </div>
+                     </div>
+                     <DialogFooter>
+                       <Button 
+                         onClick={handleImportSubscribers} 
+                         disabled={isImporting}
+                         className="rounded-none w-full bg-black text-white hover:bg-primary uppercase tracking-widest font-mono text-xs"
+                         data-testid="button-confirm-import"
+                       >
+                         {isImporting ? 'Importando...' : 'Importar Lista'}
+                       </Button>
+                     </DialogFooter>
+                   </DialogContent>
+                 </Dialog>
+
+                 <Button onClick={handleDownloadSubscribers} variant="outline" className="rounded-none border-black text-black hover:bg-black hover:text-white uppercase tracking-widest font-mono text-xs px-6 h-10 flex gap-2" data-testid="button-export-subscribers">
+                   <Download className="h-4 w-4" /> Exportar
+                 </Button>
+               </div>
              </div>
              <div className="border border-border bg-card">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent border-b border-border">
-                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">ID</TableHead>
+                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">Nome</TableHead>
                     <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">Email</TableHead>
                     <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">Data</TableHead>
-                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12 text-right">Status</TableHead>
+                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12">Status</TableHead>
+                    <TableHead className="font-mono text-xs uppercase tracking-widest text-muted-foreground h-12 text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {subscribers.map((sub) => (
-                    <TableRow key={sub.id} className="hover:bg-secondary/30 border-b border-border transition-colors">
-                      <TableCell className="font-mono text-xs">{sub.id}</TableCell>
-                      <TableCell className="font-display text-base">{sub.email}</TableCell>
-                      <TableCell className="font-mono text-xs text-muted-foreground">{sub.date}</TableCell>
-                      <TableCell className="font-mono text-xs text-right uppercase">
-                        <span className="bg-black text-white px-2 py-1 text-[10px]">{sub.status}</span>
+                  {subscribers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                        Nenhum assinante ainda. Adicione ou importe contatos.
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    subscribers.map((sub) => (
+                      <TableRow key={sub.id} className="hover:bg-secondary/30 border-b border-border transition-colors" data-testid={`row-subscriber-${sub.id}`}>
+                        <TableCell className="font-display text-base">{sub.name || '-'}</TableCell>
+                        <TableCell className="font-mono text-sm">{sub.email}</TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">{sub.date}</TableCell>
+                        <TableCell className="font-mono text-xs uppercase">
+                          <span className={`px-2 py-1 text-[10px] ${sub.status === 'active' ? 'bg-black text-white' : 'bg-gray-300 text-gray-700'}`}>
+                            {sub.status === 'active' ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDeleteSubscriber(sub.id, sub.email)}
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-red-500"
+                            data-testid={`button-delete-subscriber-${sub.id}`}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>

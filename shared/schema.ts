@@ -93,6 +93,7 @@ export type JournalPost = typeof journalPosts.$inferSelect;
 // Newsletter subscribers table
 export const subscribers = pgTable("subscribers", {
   id: serial("id").primaryKey(),
+  name: text("name").notNull().default(''),
   email: text("email").notNull().unique(),
   date: text("date").notNull(),
   status: text("status").notNull().default('active'), // 'active' | 'unsubscribed'

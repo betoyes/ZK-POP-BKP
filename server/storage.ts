@@ -60,6 +60,7 @@ export interface IStorage {
   getSubscribers(): Promise<Subscriber[]>;
   getSubscriberByEmail(email: string): Promise<Subscriber | undefined>;
   createSubscriber(subscriber: InsertSubscriber): Promise<Subscriber>;
+  createSubscribersBulk(subscribers: InsertSubscriber[]): Promise<{ inserted: number; skipped: number }>;
   updateSubscriber(id: number, subscriber: Partial<InsertSubscriber>): Promise<Subscriber | undefined>;
   deleteSubscriber(id: number): Promise<void>;
 
@@ -252,6 +253,30 @@ export class DatabaseStorage implements IStorage {
   async createSubscriber(subscriber: InsertSubscriber): Promise<Subscriber> {
     const [newSubscriber] = await db.insert(subscribers).values(subscriber).returning();
     return newSubscriber;
+  }
+
+  async createSubscribersBulk(subscribersList: InsertSubscriber[]): Promise<{ inserted: number; skipped: number }> {
+    let inserted = 0;
+    let skipped = 0;
+    
+    for (const sub of subscribersList) {
+      try {
+        const existing = await this.getSubscriberByEmail(sub.email.toLowerCase());
+        if (existing) {
+          skipped++;
+        } else {
+          await db.insert(subscribers).values({
+            ...sub,
+            email: sub.email.toLowerCase(),
+          });
+          inserted++;
+        }
+      } catch (err) {
+        skipped++;
+      }
+    }
+    
+    return { inserted, skipped };
   }
 
   async updateSubscriber(id: number, subscriber: Partial<InsertSubscriber>): Promise<Subscriber | undefined> {

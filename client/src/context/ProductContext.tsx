@@ -74,7 +74,8 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const addSubscriber = (email: string) => {
     const id = Math.max(...subscribers.map(s => s.id), 0) + 1;
     const date = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-    setSubscribers([...subscribers, { id, email, date, status: 'active' }]);
+    const name = email.split('@')[0];
+    setSubscribers([...subscribers, { id, name, email, date, status: 'active' }]);
   };
 
   // Products

@@ -154,6 +154,21 @@ export async function registerRoutes(
         console.error("Failed to send verification email:", emailErr);
         // Continue registration even if email fails
       }
+
+      // Auto-subscribe to newsletter
+      try {
+        const existingSubscriber = await storage.getSubscriberByEmail(username.toLowerCase());
+        if (!existingSubscriber) {
+          await storage.createSubscriber({
+            name: username.split('@')[0],
+            email: username.toLowerCase(),
+            date: new Date().toISOString().split('T')[0],
+            status: 'active',
+          });
+        }
+      } catch (subErr) {
+        console.error("Failed to auto-subscribe customer:", subErr);
+      }
       
       res.status(201).json({
         id: user.id,
@@ -767,6 +782,42 @@ export async function registerRoutes(
       const id = parseInt(req.params.id);
       await storage.deleteSubscriber(id);
       res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Bulk import subscribers (admin only)
+  app.post("/api/subscribers/import", requireAdmin, async (req, res, next) => {
+    try {
+      const { subscribers: subscribersList } = req.body;
+      
+      if (!Array.isArray(subscribersList) || subscribersList.length === 0) {
+        return res.status(400).json({ message: "Lista de assinantes vazia ou inválida" });
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const validSubscribers = subscribersList
+        .filter((sub: any) => sub.email && typeof sub.email === 'string' && sub.email.includes('@'))
+        .map((sub: any) => ({
+          name: (sub.name || sub.email.split('@')[0]).trim(),
+          email: sub.email.toLowerCase().trim(),
+          date: sub.date || today,
+          status: 'active',
+        }));
+
+      if (validSubscribers.length === 0) {
+        return res.status(400).json({ message: "Nenhum email válido encontrado na lista" });
+      }
+
+      const result = await storage.createSubscribersBulk(validSubscribers);
+      
+      res.json({
+        message: `Importação concluída: ${result.inserted} adicionados, ${result.skipped} já existentes ou inválidos`,
+        inserted: result.inserted,
+        skipped: result.skipped,
+        total: subscribersList.length,
+      });
     } catch (err) {
       next(err);
     }
