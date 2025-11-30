@@ -90,7 +90,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden">
-      
       {/* Modern Hero Section */}
       <section className="relative h-screen w-full overflow-hidden bg-black">
         <motion.div 
@@ -126,7 +125,7 @@ export default function Home() {
         
         {/* Frase/Assinatura - Fora do mix-blend para ter cor sólida */}
         <div className="absolute left-6 md:left-12 bottom-32 z-[60]">
-          <div className="inline-block bg-neutral-800/80 px-4 py-2">
+          <div className="inline-block px-4 py-2 pl-[20px] pr-[20px] pt-[8px] pb-[8px] mt-[50px] mb-[50px] bg-[#2626267a]">
             <p className="font-mono text-sm md:text-base tracking-[0.2em] uppercase text-white font-light">
               {branding.heroSubtitle}
             </p>
@@ -177,7 +176,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* Editorial Grid Section */}
       <section className="py-32 px-4 md:px-12 bg-background">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -212,7 +210,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* Marquee / Running Text */}
       <div className="py-12 border-y border-border overflow-hidden bg-foreground text-background whitespace-nowrap">
         <motion.div 
@@ -230,7 +227,6 @@ export default function Home() {
           <span>Luxo</span>
         </motion.div>
       </div>
-
       {/* Horizontal Product Carousel Section */}
       <section className="py-32 pl-4 md:pl-12 overflow-hidden">
         <div className="flex justify-between items-end pr-12 mb-16">
@@ -288,7 +284,6 @@ export default function Home() {
            <Link href="/shop" className="font-mono text-xs uppercase tracking-widest hover:underline underline-offset-4">Ver Toda a Coleção</Link>
         </div>
       </section>
-
       {/* Impact Phrase & Testimonials */}
       <section className="py-32 bg-secondary/20">
         <div className="container mx-auto px-6 md:px-12">
@@ -321,7 +316,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* Footer CTA */}
       <section className="h-[60vh] flex items-center justify-center bg-black text-white px-4 text-center relative overflow-hidden">
          <motion.div 
