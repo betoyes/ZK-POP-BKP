@@ -15,8 +15,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { ArrowLeft, Plus, ArrowRight, Ruler } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ArrowLeft, Plus, ArrowRight, Ruler, Gem } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+// Stone type options
+const STONE_TYPES = [
+  { id: 'natural', label: 'Diamante Natural' },
+  { id: 'synthetic', label: 'Diamante Sintético' },
+  { id: 'zirconia', label: 'Zircônia' },
+];
 
 export default function Product() {
   const [match, params] = useRoute('/product/:id');
@@ -24,6 +38,7 @@ export default function Product() {
   const { toast } = useToast();
   const [mainImage, setMainImage] = useState('');
   const [selectedVersion, setSelectedVersion] = useState(1);
+  const [selectedStoneType, setSelectedStoneType] = useState('natural');
   
   if (!match) return null;
 
@@ -34,6 +49,42 @@ export default function Product() {
     categories.find(c => c.id === product.categoryId)?.name?.toLowerCase().includes('anel') ||
     categories.find(c => c.id === product.categoryId)?.name?.toLowerCase().includes('anéis')
   );
+
+  // Get current price based on stone type
+  const getCurrentPrice = () => {
+    if (!product) return 0;
+    if (selectedStoneType === 'synthetic' && product.priceDiamondSynthetic) {
+      return product.priceDiamondSynthetic;
+    }
+    if (selectedStoneType === 'zirconia' && product.priceZirconia) {
+      return product.priceZirconia;
+    }
+    return product.price;
+  };
+
+  // Get current description based on stone type
+  const getCurrentDescription = () => {
+    if (!product) return '';
+    if (selectedStoneType === 'synthetic' && product.descriptionDiamondSynthetic) {
+      return product.descriptionDiamondSynthetic;
+    }
+    if (selectedStoneType === 'zirconia' && product.descriptionZirconia) {
+      return product.descriptionZirconia;
+    }
+    return product.description;
+  };
+
+  // Get current specs based on stone type
+  const getCurrentSpecs = () => {
+    if (!product) return [];
+    if (selectedStoneType === 'synthetic' && product.specsDiamondSynthetic?.length) {
+      return product.specsDiamondSynthetic;
+    }
+    if (selectedStoneType === 'zirconia' && product.specsZirconia?.length) {
+      return product.specsZirconia;
+    }
+    return product.specs || [];
+  };
 
   // Build versions for rings - use main image and gallery images as different versions
   const ringVersions = product ? [
@@ -135,12 +186,37 @@ export default function Product() {
                 </span>
               </div>
               <h1 className="font-display text-5xl md:text-6xl font-medium tracking-tight mb-6 leading-none">{product.name}</h1>
-              <p className="font-mono text-xl">R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="font-mono text-xl">R$ {(isRing ? getCurrentPrice() : product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
 
             <p className="text-lg leading-relaxed mb-8 text-muted-foreground font-light">
-              {product.description}
+              {isRing ? getCurrentDescription() : product.description}
             </p>
+
+            {/* Stone Type Selector - Only for rings */}
+            {isRing && (
+              <div className="mb-8">
+                <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3 block flex items-center gap-2">
+                  <Gem className="h-3 w-3" /> Tipo de Pedra
+                </span>
+                <Select value={selectedStoneType} onValueChange={setSelectedStoneType}>
+                  <SelectTrigger className="w-full rounded-none border-black h-14 font-mono text-sm uppercase tracking-widest">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STONE_TYPES.map(stone => (
+                      <SelectItem 
+                        key={stone.id} 
+                        value={stone.id}
+                        className="font-mono text-sm uppercase tracking-widest"
+                      >
+                        {stone.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Ring Version Selector - Only for rings */}
             {isRing && (
@@ -294,8 +370,8 @@ export default function Product() {
                   <AccordionTrigger className="font-mono text-xs uppercase tracking-widest py-6 hover:no-underline">Especificações Técnicas</AccordionTrigger>
                   <AccordionContent className="text-muted-foreground font-light pb-6">
                     <ul className="space-y-2">
-                      {product.specs && product.specs.length > 0 ? (
-                        product.specs.map((spec, idx) => (
+                      {(isRing ? getCurrentSpecs() : product.specs)?.length > 0 ? (
+                        (isRing ? getCurrentSpecs() : product.specs || []).map((spec, idx) => (
                           <li key={idx}>{spec}</li>
                         ))
                       ) : (

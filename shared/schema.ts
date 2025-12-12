@@ -46,7 +46,7 @@ export type Collection = typeof collections.$inferSelect;
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  price: integer("price").notNull(),
+  price: integer("price").notNull(), // Base price (Diamante Natural)
   description: text("description").notNull(),
   image: text("image"), // P&B image (Base64 or URL)
   imageColor: text("image_color"), // Color image for hover
@@ -56,6 +56,13 @@ export const products = pgTable("products", {
   specs: text("specs").array(), // Specifications array
   bestsellerOrder: integer("bestseller_order"), // Order in bestseller carousel (null = hidden)
   isNew: boolean("is_new").default(false),
+  // Stone type variants (for rings)
+  priceDiamondSynthetic: integer("price_diamond_synthetic"), // Diamante Sintético price
+  priceZirconia: integer("price_zirconia"), // Zircônia price
+  descriptionDiamondSynthetic: text("description_diamond_synthetic"), // Diamante Sintético description
+  descriptionZirconia: text("description_zirconia"), // Zircônia description
+  specsDiamondSynthetic: text("specs_diamond_synthetic").array(), // Diamante Sintético specs
+  specsZirconia: text("specs_zirconia").array(), // Zircônia specs
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({ id: true });

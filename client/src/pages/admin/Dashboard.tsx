@@ -192,7 +192,14 @@ export default function Dashboard() {
     version2: '',
     version3: '',
     specs: '',
-    bestsellerOrder: ''
+    bestsellerOrder: '',
+    // Stone type variants for rings
+    priceDiamondSynthetic: '',
+    priceZirconia: '',
+    descriptionDiamondSynthetic: '',
+    descriptionZirconia: '',
+    specsDiamondSynthetic: '',
+    specsZirconia: ''
   });
 
   // Check if selected category is "Anéis" or "Anel"
@@ -363,7 +370,14 @@ export default function Dashboard() {
       gallery: galleryImages,
       specs: formData.specs.split('\n').filter(s => s.trim() !== ''),
       bestsellerOrder: formData.bestsellerOrder ? Number(formData.bestsellerOrder) : undefined,
-      isNew: true
+      isNew: true,
+      // Stone type variants
+      priceDiamondSynthetic: formData.priceDiamondSynthetic ? parsePriceToNumber(formData.priceDiamondSynthetic) : undefined,
+      priceZirconia: formData.priceZirconia ? parsePriceToNumber(formData.priceZirconia) : undefined,
+      descriptionDiamondSynthetic: formData.descriptionDiamondSynthetic || undefined,
+      descriptionZirconia: formData.descriptionZirconia || undefined,
+      specsDiamondSynthetic: formData.specsDiamondSynthetic ? formData.specsDiamondSynthetic.split('\n').filter(s => s.trim() !== '') : undefined,
+      specsZirconia: formData.specsZirconia ? formData.specsZirconia.split('\n').filter(s => s.trim() !== '') : undefined
     });
 
     setIsAddOpen(false);
@@ -398,7 +412,14 @@ export default function Dashboard() {
       imageColor: colorImage,
       gallery: galleryImages,
       specs: formData.specs.split('\n').filter(s => s.trim() !== ''),
-      bestsellerOrder: formData.bestsellerOrder ? Number(formData.bestsellerOrder) : undefined
+      bestsellerOrder: formData.bestsellerOrder ? Number(formData.bestsellerOrder) : undefined,
+      // Stone type variants
+      priceDiamondSynthetic: formData.priceDiamondSynthetic ? parsePriceToNumber(formData.priceDiamondSynthetic) : undefined,
+      priceZirconia: formData.priceZirconia ? parsePriceToNumber(formData.priceZirconia) : undefined,
+      descriptionDiamondSynthetic: formData.descriptionDiamondSynthetic || undefined,
+      descriptionZirconia: formData.descriptionZirconia || undefined,
+      specsDiamondSynthetic: formData.specsDiamondSynthetic ? formData.specsDiamondSynthetic.split('\n').filter(s => s.trim() !== '') : undefined,
+      specsZirconia: formData.specsZirconia ? formData.specsZirconia.split('\n').filter(s => s.trim() !== '') : undefined
     });
 
     setIsEditOpen(false);
@@ -440,7 +461,14 @@ export default function Dashboard() {
       version2: isRingProduct && product.gallery?.[0] ? product.gallery[0] : '',
       version3: isRingProduct && product.gallery?.[1] ? product.gallery[1] : '',
       specs: product.specs ? product.specs.join('\n') : '',
-      bestsellerOrder: product.bestsellerOrder ? product.bestsellerOrder.toString() : ''
+      bestsellerOrder: product.bestsellerOrder ? product.bestsellerOrder.toString() : '',
+      // Stone type variants
+      priceDiamondSynthetic: product.priceDiamondSynthetic ? formatPriceForDisplay(product.priceDiamondSynthetic) : '',
+      priceZirconia: product.priceZirconia ? formatPriceForDisplay(product.priceZirconia) : '',
+      descriptionDiamondSynthetic: product.descriptionDiamondSynthetic || '',
+      descriptionZirconia: product.descriptionZirconia || '',
+      specsDiamondSynthetic: product.specsDiamondSynthetic ? product.specsDiamondSynthetic.join('\n') : '',
+      specsZirconia: product.specsZirconia ? product.specsZirconia.join('\n') : ''
     });
     setIsEditOpen(true);
   };
@@ -459,7 +487,14 @@ export default function Dashboard() {
       version2: '',
       version3: '',
       specs: '',
-      bestsellerOrder: ''
+      bestsellerOrder: '',
+      // Stone type variants
+      priceDiamondSynthetic: '',
+      priceZirconia: '',
+      descriptionDiamondSynthetic: '',
+      descriptionZirconia: '',
+      specsDiamondSynthetic: '',
+      specsZirconia: ''
     });
   };
 
@@ -987,6 +1022,82 @@ export default function Dashboard() {
                             )}
                           </div>
                         </div>
+                        
+                        {/* Stone Type Variants */}
+                        <div className="border-t border-border pt-4 mt-4">
+                          <Label className="font-mono text-xs uppercase tracking-widest text-primary">Tipos de Pedra</Label>
+                          <p className="text-xs text-muted-foreground mt-1 mb-4">Configure preços e descrições diferentes para cada tipo de pedra.</p>
+                          
+                          {/* Diamante Sintético */}
+                          <div className="space-y-3 mb-6 p-4 bg-secondary/30 border border-border">
+                            <Label className="font-mono text-xs uppercase tracking-widest">Diamante Sintético</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Preço (R$)</Label>
+                                <Input 
+                                  type="text" 
+                                  placeholder="0,00"
+                                  value={formData.priceDiamondSynthetic} 
+                                  onChange={(e) => setFormData({...formData, priceDiamondSynthetic: e.target.value.replace(/[^\d,]/g, '')})} 
+                                  className="rounded-none font-mono text-sm" 
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Descrição</Label>
+                              <Textarea 
+                                placeholder="Descrição específica para diamante sintético..."
+                                value={formData.descriptionDiamondSynthetic} 
+                                onChange={(e) => setFormData({...formData, descriptionDiamondSynthetic: e.target.value})} 
+                                className="rounded-none h-20" 
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Especificações (uma por linha)</Label>
+                              <Textarea 
+                                placeholder="Material: Ouro 18K&#10;Pedra: Diamante Sintético"
+                                value={formData.specsDiamondSynthetic} 
+                                onChange={(e) => setFormData({...formData, specsDiamondSynthetic: e.target.value})} 
+                                className="rounded-none h-20" 
+                              />
+                            </div>
+                          </div>
+                          
+                          {/* Zircônia */}
+                          <div className="space-y-3 p-4 bg-secondary/30 border border-border">
+                            <Label className="font-mono text-xs uppercase tracking-widest">Zircônia</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Preço (R$)</Label>
+                                <Input 
+                                  type="text" 
+                                  placeholder="0,00"
+                                  value={formData.priceZirconia} 
+                                  onChange={(e) => setFormData({...formData, priceZirconia: e.target.value.replace(/[^\d,]/g, '')})} 
+                                  className="rounded-none font-mono text-sm" 
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Descrição</Label>
+                              <Textarea 
+                                placeholder="Descrição específica para zircônia..."
+                                value={formData.descriptionZirconia} 
+                                onChange={(e) => setFormData({...formData, descriptionZirconia: e.target.value})} 
+                                className="rounded-none h-20" 
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Especificações (uma por linha)</Label>
+                              <Textarea 
+                                placeholder="Material: Ouro 18K&#10;Pedra: Zircônia"
+                                value={formData.specsZirconia} 
+                                onChange={(e) => setFormData({...formData, specsZirconia: e.target.value})} 
+                                className="rounded-none h-20" 
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       <div className="grid gap-2">
@@ -1201,6 +1312,82 @@ export default function Dashboard() {
                                 </button>
                               </div>
                             )}
+                          </div>
+                        </div>
+                        
+                        {/* Stone Type Variants for Edit */}
+                        <div className="border-t border-border pt-4 mt-4">
+                          <Label className="font-mono text-xs uppercase tracking-widest text-primary">Tipos de Pedra</Label>
+                          <p className="text-xs text-muted-foreground mt-1 mb-4">Configure preços e descrições diferentes para cada tipo de pedra.</p>
+                          
+                          {/* Diamante Sintético */}
+                          <div className="space-y-3 mb-6 p-4 bg-secondary/30 border border-border">
+                            <Label className="font-mono text-xs uppercase tracking-widest">Diamante Sintético</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Preço (R$)</Label>
+                                <Input 
+                                  type="text" 
+                                  placeholder="0,00"
+                                  value={formData.priceDiamondSynthetic} 
+                                  onChange={(e) => setFormData({...formData, priceDiamondSynthetic: e.target.value.replace(/[^\d,]/g, '')})} 
+                                  className="rounded-none font-mono text-sm" 
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Descrição</Label>
+                              <Textarea 
+                                placeholder="Descrição específica para diamante sintético..."
+                                value={formData.descriptionDiamondSynthetic} 
+                                onChange={(e) => setFormData({...formData, descriptionDiamondSynthetic: e.target.value})} 
+                                className="rounded-none h-20" 
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Especificações (uma por linha)</Label>
+                              <Textarea 
+                                placeholder="Material: Ouro 18K&#10;Pedra: Diamante Sintético"
+                                value={formData.specsDiamondSynthetic} 
+                                onChange={(e) => setFormData({...formData, specsDiamondSynthetic: e.target.value})} 
+                                className="rounded-none h-20" 
+                              />
+                            </div>
+                          </div>
+                          
+                          {/* Zircônia */}
+                          <div className="space-y-3 p-4 bg-secondary/30 border border-border">
+                            <Label className="font-mono text-xs uppercase tracking-widest">Zircônia</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Preço (R$)</Label>
+                                <Input 
+                                  type="text" 
+                                  placeholder="0,00"
+                                  value={formData.priceZirconia} 
+                                  onChange={(e) => setFormData({...formData, priceZirconia: e.target.value.replace(/[^\d,]/g, '')})} 
+                                  className="rounded-none font-mono text-sm" 
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Descrição</Label>
+                              <Textarea 
+                                placeholder="Descrição específica para zircônia..."
+                                value={formData.descriptionZirconia} 
+                                onChange={(e) => setFormData({...formData, descriptionZirconia: e.target.value})} 
+                                className="rounded-none h-20" 
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Especificações (uma por linha)</Label>
+                              <Textarea 
+                                placeholder="Material: Ouro 18K&#10;Pedra: Zircônia"
+                                value={formData.specsZirconia} 
+                                onChange={(e) => setFormData({...formData, specsZirconia: e.target.value})} 
+                                className="rounded-none h-20" 
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
