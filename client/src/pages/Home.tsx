@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'wouter';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowDown, ArrowUpRight, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Play, ChevronLeft, ChevronRight, Gem } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProducts } from '@/context/ProductContext';
 import heroImage from '@assets/generated_images/luxury_jewelry_hero_image_with_model.png';
 import necklaceImage from '@assets/generated_images/gold_necklace_product_shot.png';
@@ -11,6 +12,13 @@ import campaignVideo from '@assets/generated_videos/b&w_jewelry_fashion_b-roll.m
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { useToast } from '@/hooks/use-toast';
+
+// Stone type options
+const STONE_TYPES = [
+  { id: 'natural', label: 'Diamante Natural' },
+  { id: 'synthetic', label: 'Diamante Sintético' },
+  { id: 'zirconia', label: 'Zircônia' },
+];
 
 import { testimonials } from '@/lib/mockData';
 
@@ -22,6 +30,25 @@ export default function Home() {
   const y2 = useTransform(scrollY, [0, 500], [0, -100]);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [email, setEmail] = useState('');
+  const [selectedStoneTypes, setSelectedStoneTypes] = useState<Record<number, string>>({});
+
+  // Helper to check if a product is a ring
+  const isRingProduct = (product: any) => {
+    const cat = categories.find(c => c.id === product.categoryId);
+    return cat?.name?.toLowerCase().includes('anel') || cat?.name?.toLowerCase().includes('anéis');
+  };
+
+  // Get price based on selected stone type
+  const getProductPrice = (product: any) => {
+    const stoneType = selectedStoneTypes[product.id] || 'natural';
+    if (stoneType === 'synthetic' && product.priceDiamondSynthetic) {
+      return product.priceDiamondSynthetic;
+    }
+    if (stoneType === 'zirconia' && product.priceZirconia) {
+      return product.priceZirconia;
+    }
+    return product.price;
+  };
 
   const handleSubscribe = async () => {
     if (!email || !email.includes('@')) {
@@ -249,32 +276,59 @@ export default function Home() {
         <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
           <div className="flex gap-8 pr-12">
             {(bestsellers.length > 0 ? bestsellers : products.slice(0, 8)).map((product, idx) => (
-              <Link key={product.id} href={`/product/${product.id}`} className="shrink-0 w-[300px] md:w-[400px] group cursor-pointer select-none">
-                <div className="aspect-[3/4] bg-secondary overflow-hidden mb-6 relative">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${(!product.imageColor || product.image === product.imageColor) ? 'grayscale group-hover:grayscale-0' : ''}`}
-                  />
-                  {product.imageColor && product.image !== product.imageColor && (
+              <div key={product.id} className="shrink-0 w-[300px] md:w-[400px] group select-none">
+                <Link href={`/product/${product.id}`} className="cursor-pointer">
+                  <div className="aspect-[3/4] bg-secondary overflow-hidden mb-6 relative">
                     <img 
-                      src={product.imageColor} 
+                      src={product.image} 
                       alt={product.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 opacity-0 group-hover:opacity-100"
+                      className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${(!product.imageColor || product.image === product.imageColor) ? 'grayscale group-hover:grayscale-0' : ''}`}
                     />
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
-                </div>
+                    {product.imageColor && product.image !== product.imageColor && (
+                      <img 
+                        src={product.imageColor} 
+                        alt={product.name}
+                        className="absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 opacity-0 group-hover:opacity-100"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
+                  </div>
+                </Link>
                 <div className="flex justify-between items-start border-b border-border pb-2 group-hover:border-black transition-colors">
                   <div>
-                    <h3 className="font-display text-xl mb-1">{product.name}</h3>
+                    <Link href={`/product/${product.id}`}>
+                      <h3 className="font-display text-xl mb-1 hover:text-primary transition-colors">{product.name}</h3>
+                    </Link>
                     <span className="font-mono text-xs text-muted-foreground uppercase">{categories.find(c => c.id === product.categoryId)?.name || ''}</span>
                   </div>
                   <span className="font-mono text-sm">
-                    R$ {product.price.toLocaleString()}
+                    R$ {(getProductPrice(product) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-              </Link>
+                {/* Stone Type Selector for Rings */}
+                {isRingProduct(product) && ((product as any).priceDiamondSynthetic || (product as any).priceZirconia) && (
+                  <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                    <Select 
+                      value={selectedStoneTypes[product.id] || 'natural'} 
+                      onValueChange={(val) => setSelectedStoneTypes(prev => ({...prev, [product.id]: val}))}
+                    >
+                      <SelectTrigger className="w-full h-8 rounded-none text-xs font-mono border-black/30 hover:border-black transition-colors">
+                        <div className="flex items-center gap-2">
+                          <Gem className="h-3 w-3" />
+                          <SelectValue placeholder="Tipo de Pedra" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STONE_TYPES.map(stone => (
+                          <SelectItem key={stone.id} value={stone.id} className="text-xs font-mono">
+                            {stone.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>

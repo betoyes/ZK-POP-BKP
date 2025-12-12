@@ -39,10 +39,8 @@ export default function Product() {
   const [mainImage, setMainImage] = useState('');
   const [selectedVersion, setSelectedVersion] = useState(1);
   const [selectedStoneType, setSelectedStoneType] = useState('natural');
-  
-  if (!match) return null;
 
-  const product = products.find(p => p.id === parseInt(params.id));
+  const product = match ? products.find(p => p.id === parseInt(params.id)) : null;
   
   // Check if product is a ring
   const isRing = product && (
@@ -50,14 +48,21 @@ export default function Product() {
     categories.find(c => c.id === product.categoryId)?.name?.toLowerCase().includes('anéis')
   );
 
+  // Build versions for rings - use main image and gallery images as different versions
+  const ringVersions = product ? [
+    { version: 1, image: product.imageColor || product.image, name: 'Versão 1' },
+    { version: 2, image: (product.gallery as any)?.[0] || product.image, name: 'Versão 2' },
+    { version: 3, image: (product.gallery as any)?.[1] || (product.gallery as any)?.[0] || product.image, name: 'Versão 3' },
+  ] : [];
+
   // Get current price based on stone type
   const getCurrentPrice = () => {
     if (!product) return 0;
-    if (selectedStoneType === 'synthetic' && product.priceDiamondSynthetic) {
-      return product.priceDiamondSynthetic;
+    if (selectedStoneType === 'synthetic' && (product as any).priceDiamondSynthetic) {
+      return (product as any).priceDiamondSynthetic;
     }
-    if (selectedStoneType === 'zirconia' && product.priceZirconia) {
-      return product.priceZirconia;
+    if (selectedStoneType === 'zirconia' && (product as any).priceZirconia) {
+      return (product as any).priceZirconia;
     }
     return product.price;
   };
@@ -65,43 +70,38 @@ export default function Product() {
   // Get current description based on stone type
   const getCurrentDescription = () => {
     if (!product) return '';
-    if (selectedStoneType === 'synthetic' && product.descriptionDiamondSynthetic) {
-      return product.descriptionDiamondSynthetic;
+    if (selectedStoneType === 'synthetic' && (product as any).descriptionDiamondSynthetic) {
+      return (product as any).descriptionDiamondSynthetic;
     }
-    if (selectedStoneType === 'zirconia' && product.descriptionZirconia) {
-      return product.descriptionZirconia;
+    if (selectedStoneType === 'zirconia' && (product as any).descriptionZirconia) {
+      return (product as any).descriptionZirconia;
     }
     return product.description;
   };
 
   // Get current specs based on stone type
-  const getCurrentSpecs = () => {
+  const getCurrentSpecs = (): string[] => {
     if (!product) return [];
-    if (selectedStoneType === 'synthetic' && product.specsDiamondSynthetic?.length) {
-      return product.specsDiamondSynthetic;
+    if (selectedStoneType === 'synthetic' && (product as any).specsDiamondSynthetic?.length) {
+      return (product as any).specsDiamondSynthetic;
     }
-    if (selectedStoneType === 'zirconia' && product.specsZirconia?.length) {
-      return product.specsZirconia;
+    if (selectedStoneType === 'zirconia' && (product as any).specsZirconia?.length) {
+      return (product as any).specsZirconia;
     }
-    return product.specs || [];
+    return (product.specs as string[]) || [];
   };
-
-  // Build versions for rings - use main image and gallery images as different versions
-  const ringVersions = product ? [
-    { version: 1, image: product.imageColor || product.image, name: 'Versão 1' },
-    { version: 2, image: product.gallery?.[0] || product.image, name: 'Versão 2' },
-    { version: 3, image: product.gallery?.[1] || product.gallery?.[0] || product.image, name: 'Versão 3' },
-  ] : [];
 
   useEffect(() => {
     if (product) {
       if (isRing && ringVersions[selectedVersion - 1]) {
         setMainImage(ringVersions[selectedVersion - 1].image);
       } else {
-        setMainImage(product.imageColor || product.image);
+        setMainImage(product.imageColor || product.image || '');
       }
     }
-  }, [product, selectedVersion]);
+  }, [product, selectedVersion, isRing]);
+
+  if (!match) return null;
 
   if (!product) {
     return (
@@ -186,7 +186,7 @@ export default function Product() {
                 </span>
               </div>
               <h1 className="font-display text-5xl md:text-6xl font-medium tracking-tight mb-6 leading-none">{product.name}</h1>
-              <p className="font-mono text-xl">R$ {(isRing ? getCurrentPrice() : product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="font-mono text-xl">R$ {((isRing ? getCurrentPrice() : product.price) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
 
             <p className="text-lg leading-relaxed mb-8 text-muted-foreground font-light">
@@ -370,8 +370,8 @@ export default function Product() {
                   <AccordionTrigger className="font-mono text-xs uppercase tracking-widest py-6 hover:no-underline">Especificações Técnicas</AccordionTrigger>
                   <AccordionContent className="text-muted-foreground font-light pb-6">
                     <ul className="space-y-2">
-                      {(isRing ? getCurrentSpecs() : product.specs)?.length > 0 ? (
-                        (isRing ? getCurrentSpecs() : product.specs || []).map((spec, idx) => (
+                      {(isRing ? getCurrentSpecs() : ((product.specs as string[]) || [])).length > 0 ? (
+                        (isRing ? getCurrentSpecs() : ((product.specs as string[]) || [])).map((spec: string, idx: number) => (
                           <li key={idx}>{spec}</li>
                         ))
                       ) : (
