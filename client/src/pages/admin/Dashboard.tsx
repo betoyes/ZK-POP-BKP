@@ -1138,249 +1138,228 @@ export default function Dashboard() {
 
             {/* Edit Dialog */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-              <DialogContent className="sm:max-w-[700px] max-h-[90vh] bg-background border border-border overflow-hidden flex flex-col">
+              <DialogContent className="sm:max-w-[1100px] max-h-[90vh] bg-background border border-border overflow-hidden flex flex-col">
                 <DialogHeader className="flex-shrink-0">
                   <DialogTitle className="font-display text-2xl">Editar Produto</DialogTitle>
                   <DialogDescription className="sr-only">Formulário para editar um produto existente</DialogDescription>
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto pr-2">
-                <div className="grid gap-6 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-name">Nome</Label>
-                    <Input id="edit-name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="rounded-none" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-price">Preço (R$)</Label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
-                      <Input 
-                        id="edit-price" 
-                        type="text" 
-                        value={formData.price} 
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^\d,]/g, '');
-                          setFormData({...formData, price: value});
-                        }} 
-                        placeholder="0,00"
-                        className="rounded-none pl-10" 
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-category">Categoria</Label>
-                    <Select value={formData.category} onValueChange={(val) => setFormData({...formData, category: val})}>
-                      <SelectTrigger className="rounded-none">
-                        <SelectValue placeholder="Selecione..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-collection">Coleção</Label>
-                    <Select value={formData.collection} onValueChange={(val) => setFormData({...formData, collection: val})}>
-                      <SelectTrigger className="rounded-none">
-                        <SelectValue placeholder="Selecione..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {collections.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="edit-desc">Descrição</Label>
-                    <Input id="edit-desc" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="rounded-none" />
-                  </div>
-                  <div className="grid gap-2">
-                      <Label>Imagem (P&B / Principal)</Label>
-                      <div className="flex gap-4 items-center">
-                        <Input 
-                            type="file" 
-                            accept="image/*"
-                            onChange={(e) => handleImageUpload(e, 'image')}
-                            className="rounded-none font-mono text-xs" 
-                        />
-                        {formData.image && <div className="h-10 w-10 bg-secondary"><img src={formData.image} className="h-full w-full object-cover" /></div>}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 py-4">
+                    {/* LEFT COLUMN - Basic Info */}
+                    <div className="space-y-4">
+                      <h3 className="font-mono text-xs uppercase tracking-widest text-primary border-b border-border pb-2">Informações Básicas</h3>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-name">Nome</Label>
+                        <Input id="edit-name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="rounded-none" />
                       </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-price">Preço (R$)</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
+                          <Input 
+                            id="edit-price" 
+                            type="text" 
+                            value={formData.price} 
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^\d,]/g, '');
+                              setFormData({...formData, price: value});
+                            }} 
+                            placeholder="0,00"
+                            className="rounded-none pl-10" 
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-category">Categoria</Label>
+                          <Select value={formData.category} onValueChange={(val) => setFormData({...formData, category: val})}>
+                            <SelectTrigger className="rounded-none">
+                              <SelectValue placeholder="Selecione..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {categories.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-collection">Coleção</Label>
+                          <Select value={formData.collection} onValueChange={(val) => setFormData({...formData, collection: val})}>
+                            <SelectTrigger className="rounded-none">
+                              <SelectValue placeholder="Selecione..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {collections.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-desc">Descrição</Label>
+                        <Textarea id="edit-desc" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="rounded-none h-20" />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-specs">Especificações (uma por linha)</Label>
+                        <Textarea 
+                          id="edit-specs" 
+                          value={formData.specs} 
+                          onChange={(e) => setFormData({...formData, specs: e.target.value})} 
+                          className="rounded-none h-20" 
+                          placeholder="Material: Ouro 18K&#10;Peso: 5g"
+                        />
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-bestsellerOrder">Ordem no Bestsellers</Label>
+                        <Input id="edit-bestsellerOrder" type="number" placeholder="Deixe vazio para ocultar" value={formData.bestsellerOrder} onChange={(e) => setFormData({...formData, bestsellerOrder: e.target.value})} className="rounded-none" />
+                      </div>
+                      
+                      {/* Stone Type Variants - only for rings */}
+                      {isRingCategory() && (
+                        <div className="border-t border-border pt-4 mt-4">
+                          <h3 className="font-mono text-xs uppercase tracking-widest text-primary mb-4">Tipos de Pedra</h3>
+                          
+                          <div className="space-y-4">
+                            <div className="p-3 bg-secondary/30 border border-border">
+                              <Label className="font-mono text-xs uppercase">Diamante Sintético</Label>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                <Input type="text" placeholder="Preço R$" value={formData.priceDiamondSynthetic} onChange={(e) => setFormData({...formData, priceDiamondSynthetic: e.target.value.replace(/[^\d,]/g, '')})} className="rounded-none text-sm" />
+                              </div>
+                              <Textarea placeholder="Descrição..." value={formData.descriptionDiamondSynthetic} onChange={(e) => setFormData({...formData, descriptionDiamondSynthetic: e.target.value})} className="rounded-none h-16 mt-2" />
+                            </div>
+                            
+                            <div className="p-3 bg-secondary/30 border border-border">
+                              <Label className="font-mono text-xs uppercase">Zircônia</Label>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                <Input type="text" placeholder="Preço R$" value={formData.priceZirconia} onChange={(e) => setFormData({...formData, priceZirconia: e.target.value.replace(/[^\d,]/g, '')})} className="rounded-none text-sm" />
+                              </div>
+                              <Textarea placeholder="Descrição..." value={formData.descriptionZirconia} onChange={(e) => setFormData({...formData, descriptionZirconia: e.target.value})} className="rounded-none h-16 mt-2" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    {/* Conditional: Ring Versions or Gallery for Edit */}
-                    {isRingCategory() ? (
-                      <div className="grid gap-4 border-t border-border pt-4">
-                        <Label className="font-mono text-xs uppercase tracking-widest text-primary">Versões do Anel</Label>
-                        <p className="text-xs text-muted-foreground -mt-2">Cada anel pode ter até 3 versões diferentes que o cliente poderá escolher.</p>
+                    
+                    {/* RIGHT COLUMN - Media */}
+                    <div className="space-y-4">
+                      <h3 className="font-mono text-xs uppercase tracking-widest text-primary border-b border-border pb-2">Mídia do Produto</h3>
+                      
+                      {/* Image Grid - 4 boxes */}
+                      <div className="grid grid-cols-4 gap-3">
+                        {/* Main Image */}
+                        <div className="space-y-2">
+                          <Label className="text-xs">Imagem Principal</Label>
+                          <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                            {formData.image ? (
+                              <>
+                                <img src={formData.image} className="h-full w-full object-cover" />
+                                <button 
+                                  onClick={() => setFormData(prev => ({...prev, image: ''}))}
+                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                >
+                                  <Trash className="h-3 w-3" />
+                                </button>
+                              </>
+                            ) : (
+                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                <Plus className="h-6 w-6 text-muted-foreground" />
+                                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'image')} className="hidden" />
+                              </label>
+                            )}
+                          </div>
+                        </div>
                         
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="space-y-2">
-                            <Label className="text-xs">Versão 1</Label>
-                            <Input 
-                              type="file" 
-                              accept="image/*"
-                              onChange={(e) => handleVersionUpload(e, 'version1')}
-                              className="rounded-none font-mono text-xs" 
-                            />
-                            {formData.version1 && (
-                              <div className="relative h-20 w-20 bg-secondary">
+                        {/* Version 1 */}
+                        <div className="space-y-2">
+                          <Label className="text-xs">Versão 1</Label>
+                          <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                            {formData.version1 ? (
+                              <>
                                 <img src={formData.version1} className="h-full w-full object-cover" />
                                 <button 
                                   onClick={() => setFormData(prev => ({...prev, version1: ''}))}
-                                  className="absolute top-0 right-0 bg-red-500 text-white p-1"
+                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                                 >
                                   <Trash className="h-3 w-3" />
                                 </button>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label className="text-xs">Versão 2</Label>
-                            <Input 
-                              type="file" 
-                              accept="image/*"
-                              onChange={(e) => handleVersionUpload(e, 'version2')}
-                              className="rounded-none font-mono text-xs" 
-                            />
-                            {formData.version2 && (
-                              <div className="relative h-20 w-20 bg-secondary">
-                                <img src={formData.version2} className="h-full w-full object-cover" />
-                                <button 
-                                  onClick={() => setFormData(prev => ({...prev, version2: ''}))}
-                                  className="absolute top-0 right-0 bg-red-500 text-white p-1"
-                                >
-                                  <Trash className="h-3 w-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label className="text-xs">Versão 3</Label>
-                            <Input 
-                              type="file" 
-                              accept="image/*"
-                              onChange={(e) => handleVersionUpload(e, 'version3')}
-                              className="rounded-none font-mono text-xs" 
-                            />
-                            {formData.version3 && (
-                              <div className="relative h-20 w-20 bg-secondary">
-                                <img src={formData.version3} className="h-full w-full object-cover" />
-                                <button 
-                                  onClick={() => setFormData(prev => ({...prev, version3: ''}))}
-                                  className="absolute top-0 right-0 bg-red-500 text-white p-1"
-                                >
-                                  <Trash className="h-3 w-3" />
-                                </button>
-                              </div>
+                              </>
+                            ) : (
+                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                <Plus className="h-6 w-6 text-muted-foreground" />
+                                <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version1')} className="hidden" />
+                              </label>
                             )}
                           </div>
                         </div>
                         
-                        {/* Stone Type Variants for Edit */}
-                        <div className="border-t border-border pt-4 mt-4">
-                          <Label className="font-mono text-xs uppercase tracking-widest text-primary">Tipos de Pedra</Label>
-                          <p className="text-xs text-muted-foreground mt-1 mb-4">Configure preços e descrições diferentes para cada tipo de pedra.</p>
-                          
-                          {/* Diamante Sintético */}
-                          <div className="space-y-3 mb-6 p-4 bg-secondary/30 border border-border">
-                            <Label className="font-mono text-xs uppercase tracking-widest">Diamante Sintético</Label>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs text-muted-foreground">Preço (R$)</Label>
-                                <Input 
-                                  type="text" 
-                                  placeholder="0,00"
-                                  value={formData.priceDiamondSynthetic} 
-                                  onChange={(e) => setFormData({...formData, priceDiamondSynthetic: e.target.value.replace(/[^\d,]/g, '')})} 
-                                  className="rounded-none font-mono text-sm" 
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-xs text-muted-foreground">Descrição</Label>
-                              <Textarea 
-                                placeholder="Descrição específica para diamante sintético..."
-                                value={formData.descriptionDiamondSynthetic} 
-                                onChange={(e) => setFormData({...formData, descriptionDiamondSynthetic: e.target.value})} 
-                                className="rounded-none h-20" 
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs text-muted-foreground">Especificações (uma por linha)</Label>
-                              <Textarea 
-                                placeholder="Material: Ouro 18K&#10;Pedra: Diamante Sintético"
-                                value={formData.specsDiamondSynthetic} 
-                                onChange={(e) => setFormData({...formData, specsDiamondSynthetic: e.target.value})} 
-                                className="rounded-none h-20" 
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Zircônia */}
-                          <div className="space-y-3 p-4 bg-secondary/30 border border-border">
-                            <Label className="font-mono text-xs uppercase tracking-widest">Zircônia</Label>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <Label className="text-xs text-muted-foreground">Preço (R$)</Label>
-                                <Input 
-                                  type="text" 
-                                  placeholder="0,00"
-                                  value={formData.priceZirconia} 
-                                  onChange={(e) => setFormData({...formData, priceZirconia: e.target.value.replace(/[^\d,]/g, '')})} 
-                                  className="rounded-none font-mono text-sm" 
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-xs text-muted-foreground">Descrição</Label>
-                              <Textarea 
-                                placeholder="Descrição específica para zircônia..."
-                                value={formData.descriptionZirconia} 
-                                onChange={(e) => setFormData({...formData, descriptionZirconia: e.target.value})} 
-                                className="rounded-none h-20" 
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs text-muted-foreground">Especificações (uma por linha)</Label>
-                              <Textarea 
-                                placeholder="Material: Ouro 18K&#10;Pedra: Zircônia"
-                                value={formData.specsZirconia} 
-                                onChange={(e) => setFormData({...formData, specsZirconia: e.target.value})} 
-                                className="rounded-none h-20" 
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="grid gap-2">
-                        <Label>Galeria de Fotos</Label>
-                        <div className="flex gap-4 items-center">
-                          <Input 
-                              type="file" 
-                              accept="image/*"
-                              multiple
-                              onChange={handleGalleryUpload}
-                              className="rounded-none font-mono text-xs" 
-                          />
-                        </div>
-                        {formData.gallery.length > 0 && (
-                          <div className="grid grid-cols-4 gap-2 mt-2">
-                            {formData.gallery.map((img, idx) => (
-                              <div key={idx} className="relative group h-16 w-16 bg-secondary">
-                                <img src={img} className="h-full w-full object-cover" />
+                        {/* Version 2 */}
+                        <div className="space-y-2">
+                          <Label className="text-xs">Versão 2</Label>
+                          <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                            {formData.version2 ? (
+                              <>
+                                <img src={formData.version2} className="h-full w-full object-cover" />
                                 <button 
-                                  onClick={() => removeGalleryImage(idx)}
-                                  className="absolute top-0 right-0 bg-red-500 text-white p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => setFormData(prev => ({...prev, version2: ''}))}
+                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                                 >
                                   <Trash className="h-3 w-3" />
                                 </button>
-                              </div>
-                            ))}
+                              </>
+                            ) : (
+                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                <Plus className="h-6 w-6 text-muted-foreground" />
+                                <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version2')} className="hidden" />
+                              </label>
+                            )}
                           </div>
-                        )}
+                        </div>
+                        
+                        {/* Version 3 */}
+                        <div className="space-y-2">
+                          <Label className="text-xs">Versão 3</Label>
+                          <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                            {formData.version3 ? (
+                              <>
+                                <img src={formData.version3} className="h-full w-full object-cover" />
+                                <button 
+                                  onClick={() => setFormData(prev => ({...prev, version3: ''}))}
+                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                >
+                                  <Trash className="h-3 w-3" />
+                                </button>
+                              </>
+                            ) : (
+                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                <Plus className="h-6 w-6 text-muted-foreground" />
+                                <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version3')} className="hidden" />
+                              </label>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    )}
-                </div>
+                      
+                      <p className="text-[10px] text-muted-foreground">Clique em cada caixa para adicionar uma imagem. Versões aparecem na galeria do produto.</p>
+                      
+                      {/* Video Input */}
+                      <div className="grid gap-2 pt-4 border-t border-border">
+                        <Label htmlFor="edit-video">Vídeo do Produto</Label>
+                        <Input 
+                          id="edit-video" 
+                          type="text" 
+                          placeholder="URL do vídeo (YouTube, Vimeo, etc.)"
+                          value={formData.video} 
+                          onChange={(e) => setFormData({...formData, video: e.target.value})} 
+                          className="rounded-none" 
+                        />
+                        <p className="text-[10px] text-muted-foreground">Cole o link do vídeo do produto</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <DialogFooter className="flex-shrink-0 pt-4 border-t border-border">
                   <Button onClick={handleEdit} className="rounded-none w-full bg-black text-white hover:bg-primary uppercase tracking-widest font-mono text-xs">Atualizar</Button>
