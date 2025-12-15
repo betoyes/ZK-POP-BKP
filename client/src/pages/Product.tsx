@@ -101,7 +101,7 @@ export default function Product() {
       if (isRing && ringVersions[selectedVersion - 1]) {
         setMainImage(ringVersions[selectedVersion - 1].image);
       } else {
-        setMainImage(product.imageColor || product.image || '');
+        setMainImage(product.image || product.imageColor || '');
       }
     }
   }, [product, selectedVersion, isRing]);
@@ -150,7 +150,7 @@ export default function Product() {
              <div className="sticky top-32 space-y-6">
                <div className="aspect-[3/4] bg-secondary overflow-hidden">
                  <img 
-                  src={mainImage || product.imageColor || product.image} 
+                  src={mainImage || product.image || product.imageColor} 
                   alt={product.name} 
                   className="w-full h-full object-cover transition-opacity duration-300"
                 />
@@ -177,35 +177,6 @@ export default function Product() {
                  </div>
                )}
 
-               {/* Product Video */}
-               {(product as any).video && (
-                 <div className="mt-8">
-                   <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">Vídeo do Produto</h3>
-                   <div className="aspect-video bg-secondary overflow-hidden rounded-none border border-border">
-                     {(product as any).video.includes('youtube.com') || (product as any).video.includes('youtu.be') ? (
-                       <iframe
-                         src={(product as any).video.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
-                         className="w-full h-full"
-                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                         allowFullScreen
-                       />
-                     ) : (product as any).video.includes('vimeo.com') ? (
-                       <iframe
-                         src={(product as any).video.replace('vimeo.com/', 'player.vimeo.com/video/')}
-                         className="w-full h-full"
-                         allow="autoplay; fullscreen; picture-in-picture"
-                         allowFullScreen
-                       />
-                     ) : (
-                       <video
-                         src={(product as any).video}
-                         controls
-                         className="w-full h-full object-cover"
-                       />
-                     )}
-                   </div>
-                 </div>
-               )}
              </div>
           </div>
 
@@ -260,6 +231,56 @@ export default function Product() {
                   Escolha sua versão
                 </span>
                 <div className="flex gap-3">
+                  {/* Video Card - First */}
+                  {(product as any).video && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="group relative flex-1 border border-border hover:border-black/50 transition-all duration-300">
+                          <div className="aspect-square overflow-hidden bg-black flex items-center justify-center">
+                            <div className="text-white text-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto mb-2 opacity-80 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 py-2 text-center font-mono text-[10px] uppercase tracking-widest bg-white/90 text-muted-foreground group-hover:bg-black/10 transition-all">
+                            Vídeo
+                          </div>
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[800px] p-0">
+                        <DialogHeader className="sr-only">
+                          <DialogTitle>Vídeo do Produto</DialogTitle>
+                          <DialogDescription>Assistir vídeo do produto</DialogDescription>
+                        </DialogHeader>
+                        <div className="aspect-video w-full">
+                          {(product as any).video.includes('youtube.com') || (product as any).video.includes('youtu.be') ? (
+                            <iframe
+                              src={(product as any).video.replace('watch?v=', 'embed/').replace('youtu.be/', 'youtube.com/embed/')}
+                              className="w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (product as any).video.includes('vimeo.com') ? (
+                            <iframe
+                              src={(product as any).video.replace('vimeo.com/', 'player.vimeo.com/video/')}
+                              className="w-full h-full"
+                              allow="autoplay; fullscreen; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <video
+                              src={(product as any).video}
+                              controls
+                              autoPlay
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                   {ringVersions.map((v) => (
                     <button
                       key={v.version}
