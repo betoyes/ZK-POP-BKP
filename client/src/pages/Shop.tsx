@@ -54,7 +54,7 @@ export default function Shop() {
     }
   }, [initialCategory]);
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = (Array.isArray(products) ? products : []).filter(product => {
     // Search Filter
     if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;

@@ -315,7 +315,7 @@ export default function Dashboard() {
     }
   };
 
-  const filteredProducts = products.filter(p => 
+  const filteredProducts = (Array.isArray(products) ? products : []).filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 export default function Wishlist() {
   const { products, collections, wishlist, toggleWishlist } = useProducts();
   
-  const wishlistProducts = products.filter(p => wishlist.includes(p.id));
+  const wishlistProducts = (Array.isArray(products) ? products : []).filter(p => wishlist.includes(p.id));
 
   return (
     <div className="min-h-screen bg-background pt-32 pb-24">

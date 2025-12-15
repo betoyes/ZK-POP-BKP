@@ -110,7 +110,7 @@ export default function Home() {
   }, [emblaApi]);
 
   // Filter and Sort Bestsellers
-  const bestsellers = products
+  const bestsellers = (Array.isArray(products) ? products : [])
     .filter(p => p.bestsellerOrder !== undefined && p.bestsellerOrder > 0)
     .sort((a, b) => (a.bestsellerOrder || 999) - (b.bestsellerOrder || 999));
 
@@ -277,7 +277,7 @@ export default function Home() {
 
         <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
           <div className="flex gap-8 pr-12">
-            {(bestsellers.length > 0 ? bestsellers : products.slice(0, 8)).map((product, idx) => {
+            {(bestsellers.length > 0 ? bestsellers : (Array.isArray(products) ? products : []).slice(0, 8)).map((product, idx) => {
               const stoneType = selectedStoneTypes[product.id] || 'natural';
               const productUrl = stoneType !== 'natural' ? `/product/${product.id}?stone=${stoneType}` : `/product/${product.id}`;
               return (

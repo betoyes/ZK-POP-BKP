@@ -22,6 +22,10 @@ export interface Product {
   descriptionZirconia?: string;
   specsDiamondSynthetic?: string[];
   specsZirconia?: string[];
+  video?: string;
+  version1?: string;
+  version2?: string;
+  version3?: string;
 }
 
 export interface Category {
