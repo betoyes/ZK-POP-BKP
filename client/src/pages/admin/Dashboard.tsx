@@ -267,6 +267,18 @@ export default function Dashboard() {
       reader.readAsDataURL(file);
     }
   };
+
+  // Handle video upload
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, video: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   
   // Helper for collection/category product selection
   const toggleProductSelection = (productId: number) => {
@@ -1069,18 +1081,29 @@ export default function Dashboard() {
                         
                         <p className="text-[10px] text-muted-foreground">Clique em cada caixa para adicionar uma imagem. Versões aparecem na galeria do produto.</p>
                         
-                        {/* Video Input */}
+                        {/* Video Upload */}
                         <div className="grid gap-2 pt-4 border-t border-border">
-                          <Label htmlFor="video">Vídeo do Produto</Label>
-                          <Input 
-                            id="video" 
-                            type="text" 
-                            placeholder="URL do vídeo (YouTube, Vimeo, etc.)"
-                            value={formData.video} 
-                            onChange={(e) => setFormData({...formData, video: e.target.value})} 
-                            className="rounded-none" 
-                          />
-                          <p className="text-[10px] text-muted-foreground">Cole o link do vídeo do produto</p>
+                          <Label>Vídeo do Produto</Label>
+                          <div className="relative aspect-[9/16] max-h-48 bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                            {formData.video ? (
+                              <>
+                                <video src={formData.video} className="h-full w-full object-cover" muted />
+                                <button 
+                                  onClick={() => setFormData(prev => ({...prev, video: ''}))}
+                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                >
+                                  <Trash className="h-3 w-3" />
+                                </button>
+                              </>
+                            ) : (
+                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                <Plus className="h-6 w-6 text-muted-foreground" />
+                                <span className="text-xs text-muted-foreground mt-1">Upload Vídeo</span>
+                                <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+                              </label>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">Faça upload do vídeo do produto (formato vertical 9:16 recomendado)</p>
                         </div>
                       </div>
                     </div>
@@ -1343,18 +1366,29 @@ export default function Dashboard() {
                       
                       <p className="text-[10px] text-muted-foreground">Clique em cada caixa para adicionar uma imagem. Versões aparecem na galeria do produto.</p>
                       
-                      {/* Video Input */}
+                      {/* Video Upload */}
                       <div className="grid gap-2 pt-4 border-t border-border">
-                        <Label htmlFor="edit-video">Vídeo do Produto</Label>
-                        <Input 
-                          id="edit-video" 
-                          type="text" 
-                          placeholder="URL do vídeo (YouTube, Vimeo, etc.)"
-                          value={formData.video} 
-                          onChange={(e) => setFormData({...formData, video: e.target.value})} 
-                          className="rounded-none" 
-                        />
-                        <p className="text-[10px] text-muted-foreground">Cole o link do vídeo do produto</p>
+                        <Label>Vídeo do Produto</Label>
+                        <div className="relative aspect-[9/16] max-h-48 bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                          {formData.video ? (
+                            <>
+                              <video src={formData.video} className="h-full w-full object-cover" muted />
+                              <button 
+                                onClick={() => setFormData(prev => ({...prev, video: ''}))}
+                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                              >
+                                <Trash className="h-3 w-3" />
+                              </button>
+                            </>
+                          ) : (
+                            <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                              <Plus className="h-6 w-6 text-muted-foreground" />
+                              <span className="text-xs text-muted-foreground mt-1">Upload Vídeo</span>
+                              <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
+                            </label>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">Faça upload do vídeo do produto (formato vertical 9:16 recomendado)</p>
                       </div>
                     </div>
                   </div>

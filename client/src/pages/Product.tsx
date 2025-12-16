@@ -272,31 +272,12 @@ export default function Product() {
                           <DialogDescription>Assistir vídeo do produto</DialogDescription>
                         </DialogHeader>
                         <div className="aspect-[9/16] w-full max-h-[80vh]">
-                          {(product as any).video.includes('youtube.com') || (product as any).video.includes('youtu.be') ? (
-                            <iframe
-                              src={(product as any).video
-                                .replace('watch?v=', 'embed/')
-                                .replace('youtu.be/', 'youtube.com/embed/')
-                                .replace('/shorts/', '/embed/')}
-                              className="w-full h-full"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          ) : (product as any).video.includes('vimeo.com') ? (
-                            <iframe
-                              src={(product as any).video.replace('vimeo.com/', 'player.vimeo.com/video/')}
-                              className="w-full h-full"
-                              allow="autoplay; fullscreen; picture-in-picture"
-                              allowFullScreen
-                            />
-                          ) : (
-                            <video
-                              src={(product as any).video}
-                              controls
-                              autoPlay
-                              className="w-full h-full object-cover"
-                            />
-                          )}
+                          <video
+                            src={(product as any).video}
+                            controls
+                            autoPlay
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                       </DialogContent>
                     </Dialog>
