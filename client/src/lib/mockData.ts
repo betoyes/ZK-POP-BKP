@@ -23,6 +23,7 @@ export interface Product {
   specsDiamondSynthetic?: string[];
   specsZirconia?: string[];
   video?: string;
+  video2?: string;
   version1?: string;
   version2?: string;
   version3?: string;

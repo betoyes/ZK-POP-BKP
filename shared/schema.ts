@@ -51,7 +51,8 @@ export const products = pgTable("products", {
   image: text("image"), // Main image for store display (Base64 or URL)
   imageColor: text("image_color"), // Color image for hover (kept for backward compatibility)
   gallery: text("gallery").array(), // Additional images array (kept for backward compatibility)
-  video: text("video"), // Product video URL or embed code
+  video: text("video"), // Product video 1 (base64 or URL)
+  video2: text("video2"), // Product video 2 (base64 or URL)
   version1: text("version1"), // Version 1 image
   version2: text("version2"), // Version 2 image
   version3: text("version3"), // Version 3 image
