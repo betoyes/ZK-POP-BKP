@@ -276,7 +276,7 @@ export default function Home() {
         </div>
 
         <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
-          <div className="flex gap-8 pr-12">
+          <div className="flex gap-10 pr-12">
             {(bestsellers.length > 0 ? bestsellers : (Array.isArray(products) ? products : []).slice(0, 8)).map((product, idx) => {
               const stoneType = selectedStoneTypes[product.id] || 'natural';
               const productUrl = stoneType !== 'natural' ? `/product/${product.id}?stone=${stoneType}` : `/product/${product.id}`;
@@ -311,7 +311,7 @@ export default function Home() {
                   </span>
                 </div>
                 {/* Stone Type Selector for Rings */}
-                {isRingProduct(product) && ((product as any).priceDiamondSynthetic || (product as any).priceZirconia) && (
+                {isRingProduct(product) && (
                   <div className="mt-3" onClick={(e) => e.stopPropagation()}>
                     <Select 
                       value={selectedStoneTypes[product.id] || 'natural'} 
