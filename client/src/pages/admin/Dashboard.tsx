@@ -1349,21 +1349,34 @@ export default function Dashboard() {
                         <Input id="edit-name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="rounded-none" />
                       </div>
                       
-                      <div className="grid gap-2">
-                        <Label htmlFor="edit-price">Preço (R$)</Label>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-mainStoneName">Nome da Pedra Principal</Label>
                           <Input 
-                            id="edit-price" 
+                            id="edit-mainStoneName" 
                             type="text" 
-                            value={formData.price} 
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^\d,]/g, '');
-                              setFormData({...formData, price: value});
-                            }} 
-                            placeholder="0,00"
-                            className="rounded-none pl-10" 
+                            value={formData.mainStoneName} 
+                            onChange={(e) => setFormData({...formData, mainStoneName: e.target.value})} 
+                            placeholder="Ex: Diamante Natural"
+                            className="rounded-none" 
                           />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-price">Preço (R$)</Label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R$</span>
+                            <Input 
+                              id="edit-price" 
+                              type="text" 
+                              value={formData.price} 
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/[^\d,]/g, '');
+                                setFormData({...formData, price: value});
+                              }} 
+                              placeholder="0,00"
+                              className="rounded-none pl-10" 
+                            />
+                          </div>
                         </div>
                       </div>
                       
@@ -1413,27 +1426,62 @@ export default function Dashboard() {
                         <Input id="edit-bestsellerOrder" type="number" placeholder="Deixe vazio para ocultar" value={formData.bestsellerOrder} onChange={(e) => setFormData({...formData, bestsellerOrder: e.target.value})} className="rounded-none" />
                       </div>
                       
-                      {/* Stone Type Variants - for all products */}
+                      {/* Dynamic Stone Variations */}
                       <div className="border-t border-border pt-4 mt-4">
-                        <h3 className="font-mono text-xs uppercase tracking-widest text-primary mb-4">Variações de Pedra (Opcional)</h3>
-                        
-                        <div className="space-y-4">
-                          <div className="p-3 bg-secondary/30 border border-border">
-                            <Label className="font-mono text-xs uppercase">Diamante Sintético</Label>
-                            <div className="grid grid-cols-2 gap-2 mt-2">
-                              <Input type="text" placeholder="Preço R$" value={formData.priceDiamondSynthetic} onChange={(e) => setFormData({...formData, priceDiamondSynthetic: e.target.value.replace(/[^\d,]/g, '')})} className="rounded-none text-sm" />
-                            </div>
-                            <Textarea placeholder="Descrição..." value={formData.descriptionDiamondSynthetic} onChange={(e) => setFormData({...formData, descriptionDiamondSynthetic: e.target.value})} className="rounded-none h-16 mt-2" />
-                          </div>
-                          
-                          <div className="p-3 bg-secondary/30 border border-border">
-                            <Label className="font-mono text-xs uppercase">Zircônia</Label>
-                            <div className="grid grid-cols-2 gap-2 mt-2">
-                              <Input type="text" placeholder="Preço R$" value={formData.priceZirconia} onChange={(e) => setFormData({...formData, priceZirconia: e.target.value.replace(/[^\d,]/g, '')})} className="rounded-none text-sm" />
-                            </div>
-                            <Textarea placeholder="Descrição..." value={formData.descriptionZirconia} onChange={(e) => setFormData({...formData, descriptionZirconia: e.target.value})} className="rounded-none h-16 mt-2" />
-                          </div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-mono text-xs uppercase tracking-widest text-primary">Variações de Pedra</h3>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={addStoneVariation}
+                            className="rounded-none text-xs"
+                          >
+                            <Plus className="h-3 w-3 mr-1" /> Adicionar Variação
+                          </Button>
                         </div>
+                        
+                        {formData.stoneVariations.length === 0 ? (
+                          <p className="text-xs text-muted-foreground text-center py-4 border border-dashed border-border">
+                            Nenhuma variação adicionada. Clique em "Adicionar Variação" para criar.
+                          </p>
+                        ) : (
+                          <div className="space-y-3">
+                            {formData.stoneVariations.map((variation, index) => (
+                              <div key={variation.id} className="p-3 bg-secondary/30 border border-border relative">
+                                <button 
+                                  type="button"
+                                  onClick={() => removeStoneVariation(variation.id)}
+                                  className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                >
+                                  <Trash className="h-3 w-3" />
+                                </button>
+                                <div className="grid grid-cols-2 gap-2 mb-2">
+                                  <Input 
+                                    type="text" 
+                                    placeholder="Nome (ex: Diamante Sintético)" 
+                                    value={variation.name}
+                                    onChange={(e) => updateStoneVariation(variation.id, 'name', e.target.value)}
+                                    className="rounded-none text-sm"
+                                  />
+                                  <Input 
+                                    type="text" 
+                                    placeholder="Preço R$" 
+                                    value={variation.price}
+                                    onChange={(e) => updateStoneVariation(variation.id, 'price', e.target.value.replace(/[^\d,]/g, ''))}
+                                    className="rounded-none text-sm"
+                                  />
+                                </div>
+                                <Textarea 
+                                  placeholder="Descrição desta variação..." 
+                                  value={variation.description}
+                                  onChange={(e) => updateStoneVariation(variation.id, 'description', e.target.value)}
+                                  className="rounded-none h-16"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -1441,115 +1489,121 @@ export default function Dashboard() {
                     <div className="space-y-4">
                       <h3 className="font-mono text-xs uppercase tracking-widest text-primary border-b border-border pb-2">Mídia do Produto</h3>
                       
-                      {/* Image Grid - 4 boxes */}
-                      <div className="grid grid-cols-4 gap-3">
-                        {/* Main Image */}
-                        <div className="space-y-2">
-                          <Label className="text-xs">Imagem Principal</Label>
-                          <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
-                            {formData.image ? (
-                              <>
-                                <img src={formData.image} className="h-full w-full object-cover" />
-                                <button 
-                                  onClick={() => setFormData(prev => ({...prev, image: ''}))}
-                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
-                                >
-                                  <Trash className="h-3 w-3" />
-                                </button>
-                              </>
-                            ) : (
-                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
-                                <Plus className="h-6 w-6 text-muted-foreground" />
-                                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'image')} className="hidden" />
-                              </label>
-                            )}
+                      {/* Row 1: Versions */}
+                      <div>
+                        <Label className="text-xs text-muted-foreground mb-2 block">Versões do Produto</Label>
+                        <div className="grid grid-cols-3 gap-3">
+                          {/* Version 1 */}
+                          <div className="space-y-1">
+                            <Label className="text-xs">Versão 1</Label>
+                            <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                              {formData.version1 ? (
+                                <>
+                                  <img src={formData.version1} className="h-full w-full object-cover" />
+                                  <button 
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({...prev, version1: ''}))}
+                                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                  >
+                                    <Trash className="h-3 w-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                  <Plus className="h-6 w-6 text-muted-foreground" />
+                                  <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version1')} className="hidden" />
+                                </label>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        
-                        {/* Version 1 */}
-                        <div className="space-y-2">
-                          <Label className="text-xs">Versão 1</Label>
-                          <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
-                            {formData.version1 ? (
-                              <>
-                                <img src={formData.version1} className="h-full w-full object-cover" />
-                                <button 
-                                  onClick={() => setFormData(prev => ({...prev, version1: ''}))}
-                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
-                                >
-                                  <Trash className="h-3 w-3" />
-                                </button>
-                              </>
-                            ) : (
-                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
-                                <Plus className="h-6 w-6 text-muted-foreground" />
-                                <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version1')} className="hidden" />
-                              </label>
-                            )}
+                          
+                          {/* Version 2 */}
+                          <div className="space-y-1">
+                            <Label className="text-xs">Versão 2</Label>
+                            <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                              {formData.version2 ? (
+                                <>
+                                  <img src={formData.version2} className="h-full w-full object-cover" />
+                                  <button 
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({...prev, version2: ''}))}
+                                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                  >
+                                    <Trash className="h-3 w-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                  <Plus className="h-6 w-6 text-muted-foreground" />
+                                  <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version2')} className="hidden" />
+                                </label>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                        
-                        {/* Version 2 */}
-                        <div className="space-y-2">
-                          <Label className="text-xs">Versão 2</Label>
-                          <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
-                            {formData.version2 ? (
-                              <>
-                                <img src={formData.version2} className="h-full w-full object-cover" />
-                                <button 
-                                  onClick={() => setFormData(prev => ({...prev, version2: ''}))}
-                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
-                                >
-                                  <Trash className="h-3 w-3" />
-                                </button>
-                              </>
-                            ) : (
-                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
-                                <Plus className="h-6 w-6 text-muted-foreground" />
-                                <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version2')} className="hidden" />
-                              </label>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Version 3 */}
-                        <div className="space-y-2">
-                          <Label className="text-xs">Versão 3</Label>
-                          <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
-                            {formData.version3 ? (
-                              <>
-                                <img src={formData.version3} className="h-full w-full object-cover" />
-                                <button 
-                                  onClick={() => setFormData(prev => ({...prev, version3: ''}))}
-                                  className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
-                                >
-                                  <Trash className="h-3 w-3" />
-                                </button>
-                              </>
-                            ) : (
-                              <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
-                                <Plus className="h-6 w-6 text-muted-foreground" />
-                                <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version3')} className="hidden" />
-                              </label>
-                            )}
+                          
+                          {/* Version 3 */}
+                          <div className="space-y-1">
+                            <Label className="text-xs">Versão 3</Label>
+                            <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                              {formData.version3 ? (
+                                <>
+                                  <img src={formData.version3} className="h-full w-full object-cover" />
+                                  <button 
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({...prev, version3: ''}))}
+                                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                  >
+                                    <Trash className="h-3 w-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                  <Plus className="h-6 w-6 text-muted-foreground" />
+                                  <input type="file" accept="image/*" onChange={(e) => handleVersionUpload(e, 'version3')} className="hidden" />
+                                </label>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                       
-                      <p className="text-[10px] text-muted-foreground">Clique em cada caixa para adicionar uma imagem. Versões aparecem na galeria do produto.</p>
-                      
-                      {/* Video Uploads - 2 videos */}
-                      <div className="grid gap-2 pt-4 border-t border-border">
-                        <Label>Vídeos do Produto (2)</Label>
-                        <div className="grid grid-cols-2 gap-3">
+                      {/* Row 2: Main Image + Videos */}
+                      <div className="pt-4 border-t border-border">
+                        <Label className="text-xs text-muted-foreground mb-2 block">Imagem Principal + Vídeos</Label>
+                        <div className="grid grid-cols-3 gap-3">
+                          {/* Main Image */}
+                          <div className="space-y-1">
+                            <Label className="text-xs">Imagem Principal</Label>
+                            <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                              {formData.image ? (
+                                <>
+                                  <img src={formData.image} className="h-full w-full object-cover" />
+                                  <button 
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({...prev, image: ''}))}
+                                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                  >
+                                    <Trash className="h-3 w-3" />
+                                  </button>
+                                </>
+                              ) : (
+                                <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full">
+                                  <Plus className="h-6 w-6 text-muted-foreground" />
+                                  <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, 'image')} className="hidden" />
+                                </label>
+                              )}
+                            </div>
+                          </div>
+                          
                           {/* Video 1 */}
                           <div className="space-y-1">
                             <Label className="text-xs">Vídeo 1</Label>
-                            <div className="relative aspect-[9/16] max-h-32 bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                            <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
                               {formData.video ? (
                                 <>
                                   <video src={formData.video} className="h-full w-full object-cover" muted />
                                   <button 
+                                    type="button"
                                     onClick={() => setFormData(prev => ({...prev, video: ''}))}
                                     className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                                   >
@@ -1567,11 +1621,12 @@ export default function Dashboard() {
                           {/* Video 2 */}
                           <div className="space-y-1">
                             <Label className="text-xs">Vídeo 2</Label>
-                            <div className="relative aspect-[9/16] max-h-32 bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                            <div className="relative aspect-square bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
                               {formData.video2 ? (
                                 <>
                                   <video src={formData.video2} className="h-full w-full object-cover" muted />
                                   <button 
+                                    type="button"
                                     onClick={() => setFormData(prev => ({...prev, video2: ''}))}
                                     className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                                   >
@@ -1587,7 +1642,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                         </div>
-                        <p className="text-[10px] text-muted-foreground">Faça upload dos vídeos do produto (formato vertical 9:16 recomendado)</p>
+                        <p className="text-[10px] text-muted-foreground mt-2">Versões: fotos alternativas. Vídeos: formato vertical 9:16 recomendado.</p>
                       </div>
                     </div>
                   </div>
