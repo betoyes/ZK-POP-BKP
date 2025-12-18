@@ -16,22 +16,9 @@ import {
   DialogTrigger,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { ArrowLeft, Plus, ArrowRight, Ruler, Gem } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-// Stone type options
-const STONE_TYPES = [
-  { id: 'natural', label: 'Diamante Natural' },
-  { id: 'synthetic', label: 'Diamante Sintético' },
-  { id: 'zirconia', label: 'Zircônia' },
-];
+import StoneSelector, { hasStoneVariations, getStonePrice, getStoneOptions, getStoneLabel } from '@/components/StoneSelector';
 
 export default function Product() {
   const [match, params] = useRoute('/product/:id');
@@ -43,14 +30,12 @@ export default function Product() {
   const { toast } = useToast();
   const [mainImage, setMainImage] = useState('');
   const [selectedVersion, setSelectedVersion] = useState(1);
-  const [selectedStoneType, setSelectedStoneType] = useState(stoneFromUrl || 'natural');
+  const [selectedStoneType, setSelectedStoneType] = useState(stoneFromUrl || 'main');
 
   const product = match ? products.find(p => p.id === parseInt(params.id)) : null;
   
-  // Check if product has stone variations (for stone type selector and price changes)
-  const hasStoneVariations = product && (
-    (product as any).priceDiamondSynthetic || (product as any).priceZirconia
-  );
+  // Check if product has stone variations
+  const productHasVariations = product ? hasStoneVariations(product) : false;
 
   // Build versions for all products - use version1, version2, version3 fields
   const productVersions = product ? [
@@ -68,23 +53,30 @@ export default function Product() {
   // Get current price based on stone type
   const getCurrentPrice = () => {
     if (!product) return 0;
-    if (selectedStoneType === 'synthetic' && (product as any).priceDiamondSynthetic) {
-      return (product as any).priceDiamondSynthetic;
-    }
-    if (selectedStoneType === 'zirconia' && (product as any).priceZirconia) {
-      return (product as any).priceZirconia;
-    }
-    return product.price;
+    return getStonePrice(product, selectedStoneType);
   };
 
   // Get current description based on stone type
   const getCurrentDescription = () => {
     if (!product) return '';
+    // For legacy variations, use specific descriptions
     if (selectedStoneType === 'synthetic' && (product as any).descriptionDiamondSynthetic) {
       return (product as any).descriptionDiamondSynthetic;
     }
     if (selectedStoneType === 'zirconia' && (product as any).descriptionZirconia) {
       return (product as any).descriptionZirconia;
+    }
+    // For dynamic variations, check if there's a description
+    if (selectedStoneType.startsWith('var_') && product.stoneVariations) {
+      try {
+        const variations = typeof product.stoneVariations === 'string' 
+          ? JSON.parse(product.stoneVariations) 
+          : product.stoneVariations;
+        const idx = parseInt(selectedStoneType.replace('var_', ''));
+        if (variations[idx]?.description) {
+          return variations[idx].description;
+        }
+      } catch (e) {}
     }
     return product.description;
   };
@@ -187,35 +179,25 @@ export default function Product() {
                 </span>
               </div>
               <h1 className="font-display text-5xl md:text-6xl font-medium tracking-tight mb-6 leading-none">{product.name}</h1>
-              <p className="font-mono text-xl">R$ {((hasStoneVariations ? getCurrentPrice() : product.price) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="font-mono text-xl">R$ {((productHasVariations ? getCurrentPrice() : product.price) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
 
             <p className="text-lg leading-relaxed mb-8 text-muted-foreground font-light">
-              {hasStoneVariations ? getCurrentDescription() : product.description}
+              {productHasVariations ? getCurrentDescription() : product.description}
             </p>
 
-            {/* Stone Type Selector - Only for rings */}
-            {hasStoneVariations && (
+            {/* Stone Type Selector - Dynamic */}
+            {productHasVariations && (
               <div className="mb-8">
                 <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3 block flex items-center gap-2">
                   <Gem className="h-3 w-3" /> Tipo de Pedra
                 </span>
-                <Select value={selectedStoneType} onValueChange={setSelectedStoneType}>
-                  <SelectTrigger className="w-full rounded-none border-black h-14 font-mono text-sm uppercase tracking-widest">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STONE_TYPES.map(stone => (
-                      <SelectItem 
-                        key={stone.id} 
-                        value={stone.id}
-                        className="font-mono text-sm uppercase tracking-widest"
-                      >
-                        {stone.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <StoneSelector
+                  product={product}
+                  value={selectedStoneType}
+                  onChange={setSelectedStoneType}
+                  size="lg"
+                />
               </div>
             )}
 

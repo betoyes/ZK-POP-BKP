@@ -1,57 +1,17 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowDown, ArrowUpRight, Play, ChevronLeft, ChevronRight, Gem } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProducts } from '@/context/ProductContext';
+import StoneSelector, { hasStoneVariations, getStonePrice } from '@/components/StoneSelector';
 import heroImage from '@assets/generated_images/luxury_jewelry_hero_image_with_model.png';
 import necklaceImage from '@assets/generated_images/gold_necklace_product_shot.png';
 import campaignVideo from '@assets/generated_videos/b&w_jewelry_fashion_b-roll.mp4';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { useToast } from '@/hooks/use-toast';
-
-// Helper to parse stone variations from product
-const getStoneOptions = (product: any): { id: string; label: string; price: number }[] => {
-  const options: { id: string; label: string; price: number }[] = [];
-  
-  // Add main stone (base price)
-  options.push({
-    id: 'main',
-    label: product.mainStoneName || 'Diamante Natural',
-    price: product.price
-  });
-  
-  // Add dynamic variations from stoneVariations JSON
-  if (product.stoneVariations) {
-    try {
-      const variations = typeof product.stoneVariations === 'string' 
-        ? JSON.parse(product.stoneVariations) 
-        : product.stoneVariations;
-      variations.forEach((v: any, i: number) => {
-        if (v.name && v.price) {
-          options.push({
-            id: `var_${i}`,
-            label: v.name,
-            price: v.price
-          });
-        }
-      });
-    } catch (e) {}
-  }
-  
-  // Legacy support: add old fixed variations
-  if (product.priceDiamondSynthetic) {
-    options.push({ id: 'synthetic', label: 'Diamante Sintético', price: product.priceDiamondSynthetic });
-  }
-  if (product.priceZirconia) {
-    options.push({ id: 'zirconia', label: 'Zircônia', price: product.priceZirconia });
-  }
-  
-  return options;
-};
 
 import { testimonials } from '@/lib/mockData';
 
@@ -67,26 +27,10 @@ export default function Home() {
   const [email, setEmail] = useState('');
   const [selectedStoneTypes, setSelectedStoneTypes] = useState<Record<number, string>>({});
 
-  // Helper to check if a product has stone variations
-  const hasStoneVariations = (product: any) => {
-    const options = getStoneOptions(product);
-    return options.length > 1; // More than just the main stone
-  };
-
   // Get price based on selected stone type
   const getProductPrice = (product: any) => {
     const stoneId = selectedStoneTypes[product.id] || 'main';
-    const options = getStoneOptions(product);
-    const selected = options.find(o => o.id === stoneId);
-    return selected ? selected.price : product.price;
-  };
-  
-  // Get selected stone label
-  const getSelectedStoneLabel = (product: any) => {
-    const stoneId = selectedStoneTypes[product.id] || 'main';
-    const options = getStoneOptions(product);
-    const selected = options.find(o => o.id === stoneId);
-    return selected ? selected.label : options[0]?.label || 'Selecione';
+    return getStonePrice(product, stoneId);
   };
 
   const handleSubscribe = async () => {
@@ -353,26 +297,12 @@ export default function Home() {
                 </div>
                 {/* Stone Type Selector - Dynamic */}
                 {hasStoneVariations(product) && (
-                  <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-                    <Select 
-                      value={selectedStoneTypes[product.id] || 'main'} 
-                      onValueChange={(val) => setSelectedStoneTypes(prev => ({...prev, [product.id]: val}))}
-                    >
-                      <SelectTrigger className="w-full h-8 rounded-none text-xs font-mono border-black/30 hover:border-black transition-colors">
-                        <div className="flex items-center gap-2">
-                          <Gem className="h-3 w-3" />
-                          <SelectValue placeholder="Tipo de Pedra">{getSelectedStoneLabel(product)}</SelectValue>
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getStoneOptions(product).map(stone => (
-                          <SelectItem key={stone.id} value={stone.id} className="text-xs font-mono">
-                            {stone.label} - R$ {(stone.price / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <StoneSelector
+                    product={product}
+                    value={selectedStoneTypes[product.id] || 'main'}
+                    onChange={(val) => setSelectedStoneTypes(prev => ({...prev, [product.id]: val}))}
+                    className="mt-3"
+                  />
                 )}
               </div>
             );
