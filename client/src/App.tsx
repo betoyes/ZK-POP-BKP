@@ -34,6 +34,7 @@ import Manifesto from "@/pages/Manifesto";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import PrivacyDashboard from "@/pages/PrivacyDashboard";
+import Noivas from "@/pages/Noivas";
 
 function Router() {
   return (
@@ -49,6 +50,7 @@ function Router() {
         <Route path="/reset-password" component={ResetPassword} />
         <Route path="/shop" component={Shop} />
         <Route path="/collections" component={Collections} />
+        <Route path="/noivas" component={Noivas} />
         <Route path="/product/:id" component={Product} />
         <Route path="/cart" component={Cart} />
         <Route path="/checkout" component={Checkout} />
