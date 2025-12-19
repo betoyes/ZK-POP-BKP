@@ -510,7 +510,7 @@ export default function Product() {
                   </div>
                   <div className="flex justify-between items-start">
                     <h3 className="font-display text-lg leading-none mb-1 group-hover:underline underline-offset-4 decoration-1">{related.name}</h3>
-                    <p className="font-mono text-xs">R$ {related.price.toLocaleString('pt-BR')}</p>
+                    <p className="font-mono text-xs">R$ {(related.price / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                   </div>
                 </Link>
               ))}

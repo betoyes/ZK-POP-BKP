@@ -64,7 +64,7 @@ export default function Wishlist() {
                       <h3 className="font-display text-xl leading-none mb-2 group-hover:underline underline-offset-4 decoration-1">{product.name}</h3>
                       <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">{collections.find(c => c.id === product.collectionId)?.name || ''}</span>
                     </div>
-                    <p className="font-mono text-sm">R$ {product.price.toLocaleString('pt-BR')}</p>
+                    <p className="font-mono text-sm">R$ {(product.price / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                   </div>
                 </Link>
               </motion.div>

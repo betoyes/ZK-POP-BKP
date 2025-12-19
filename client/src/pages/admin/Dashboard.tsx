@@ -1365,7 +1365,7 @@ export default function Dashboard() {
                         <TableCell className="font-display text-base">{product.name}</TableCell>
                         <TableCell className="font-mono text-xs uppercase tracking-widest">{categories.find(c => c.id === product.categoryId)?.name || '-'}</TableCell>
                         <TableCell className="font-mono text-xs uppercase tracking-widest">{collections.find(c => c.id === product.collectionId)?.name || '-'}</TableCell>
-                        <TableCell className="font-mono text-sm text-right">R$ {product.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                        <TableCell className="font-mono text-sm text-right">R$ {(product.price / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button onClick={() => openEdit(product)} variant="ghost" size="icon" className="h-8 w-8 hover:text-black hover:bg-transparent"><Edit className="h-4 w-4" /></Button>
