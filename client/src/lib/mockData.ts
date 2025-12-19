@@ -27,6 +27,8 @@ export interface Product {
   version1?: string;
   version2?: string;
   version3?: string;
+  mainStoneName?: string;
+  stoneVariations?: string;
 }
 
 export interface Category {
