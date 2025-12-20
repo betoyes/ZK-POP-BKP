@@ -359,20 +359,41 @@ export default function Shop() {
 
                     <Link href={productUrl}>
                       <div className="relative aspect-[3/4] bg-secondary overflow-hidden mb-6">
-                        <img 
-                          src={product.image} 
-                          alt={product.name}
-                          loading="lazy"
-                          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${(!product.imageColor || product.image === product.imageColor) ? 'grayscale group-hover:grayscale-0' : ''}`}
-                        />
-                        {product.imageColor && product.image !== product.imageColor && (
-                          <img 
-                            src={product.imageColor} 
-                            alt={product.name}
-                            loading="lazy"
-                            className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-0 group-hover:opacity-100"
-                          />
-                        )}
+                        {(() => {
+                          const category = categories.find(c => c.id === product.categoryId);
+                          const isNoivas = isNoivasActive || category?.slug === 'noivas' || category?.name?.toLowerCase() === 'noivas';
+                          const hasColorImage = product.imageColor && product.image !== product.imageColor;
+                          
+                          if (isNoivas) {
+                            return (
+                              <img 
+                                src={hasColorImage ? product.imageColor : product.image} 
+                                alt={product.name}
+                                loading="lazy"
+                                className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+                              />
+                            );
+                          }
+                          
+                          return (
+                            <>
+                              <img 
+                                src={product.image} 
+                                alt={product.name}
+                                loading="lazy"
+                                className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale ${!hasColorImage ? 'group-hover:grayscale-0' : ''}`}
+                              />
+                              {hasColorImage && (
+                                <img 
+                                  src={product.imageColor} 
+                                  alt={product.name}
+                                  loading="lazy"
+                                  className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-0 group-hover:opacity-100"
+                                />
+                              )}
+                            </>
+                          );
+                        })()}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
                         
                         {/* Hover Overlay - Ver Detalhes button */}
