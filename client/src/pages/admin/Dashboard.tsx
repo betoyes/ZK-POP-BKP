@@ -208,6 +208,7 @@ export default function Dashboard() {
     video2: '',
     specs: '',
     bestsellerOrder: '',
+    zoomLevel: 105, // Zoom level for hover effect (100 = no zoom, 105 = 5%, 110 = 10%, etc)
     // Legacy stone type variants (kept for backward compatibility)
     priceDiamondSynthetic: '',
     priceZirconia: '',
@@ -218,6 +219,9 @@ export default function Dashboard() {
     // Dynamic stone variations
     stoneVariations: [] as StoneVariation[]
   });
+  
+  // State for zoom preview
+  const [isPreviewingZoom, setIsPreviewingZoom] = useState(false);
   
   // Add a new stone variation
   const addStoneVariation = () => {
@@ -440,6 +444,7 @@ export default function Dashboard() {
       video2: formData.video2 || undefined,
       specs: formData.specs.split('\n').filter(s => s.trim() !== ''),
       bestsellerOrder: formData.bestsellerOrder ? Number(formData.bestsellerOrder) : undefined,
+      zoomLevel: formData.zoomLevel,
       isNew: true,
       // Legacy stone type variants (kept for backward compatibility)
       priceDiamondSynthetic: formData.priceDiamondSynthetic ? parsePriceToNumber(formData.priceDiamondSynthetic) : undefined,
@@ -491,6 +496,7 @@ export default function Dashboard() {
       video2: formData.video2 || undefined,
       specs: formData.specs.split('\n').filter(s => s.trim() !== ''),
       bestsellerOrder: formData.bestsellerOrder ? Number(formData.bestsellerOrder) : undefined,
+      zoomLevel: formData.zoomLevel,
       // Legacy stone type variants (kept for backward compatibility)
       priceDiamondSynthetic: formData.priceDiamondSynthetic ? parsePriceToNumber(formData.priceDiamondSynthetic) : undefined,
       priceZirconia: formData.priceZirconia ? parsePriceToNumber(formData.priceZirconia) : undefined,
@@ -585,6 +591,7 @@ export default function Dashboard() {
       video2: product.video2 || '',
       specs: product.specs ? product.specs.join('\n') : '',
       bestsellerOrder: product.bestsellerOrder ? product.bestsellerOrder.toString() : '',
+      zoomLevel: product.zoomLevel || 105,
       // Legacy stone type variants
       priceDiamondSynthetic: product.priceDiamondSynthetic ? formatPriceForDisplay(product.priceDiamondSynthetic) : '',
       priceZirconia: product.priceZirconia ? formatPriceForDisplay(product.priceZirconia) : '',
@@ -616,6 +623,7 @@ export default function Dashboard() {
       video2: '',
       specs: '',
       bestsellerOrder: '',
+      zoomLevel: 105,
       // Legacy stone type variants
       priceDiamondSynthetic: '',
       priceZirconia: '',
@@ -626,6 +634,7 @@ export default function Dashboard() {
       // Dynamic stone variations
       stoneVariations: []
     });
+    setIsPreviewingZoom(false);
   };
 
   // Category Handlers
@@ -1356,6 +1365,53 @@ export default function Dashboard() {
                           </div>
                           <p className="text-[10px] text-muted-foreground mt-2">Vídeos em formato vertical 9:16 recomendado</p>
                         </div>
+                        
+                        {/* Zoom Control with Preview */}
+                        <div className="pt-4 border-t border-border">
+                          <Label className="text-xs text-muted-foreground mb-2 block">Efeito de Zoom (Hover)</Label>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="range"
+                                  min="100"
+                                  max="130"
+                                  step="5"
+                                  value={formData.zoomLevel}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, zoomLevel: Number(e.target.value) }))}
+                                  className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
+                                  data-testid="input-zoom-level"
+                                />
+                                <span className="font-mono text-sm w-12 text-center">{formData.zoomLevel}%</span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">
+                                100% = sem zoom, 105% = zoom padrão, 130% = zoom máximo
+                              </p>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-xs">Preview (passe o mouse)</Label>
+                              <div 
+                                className="relative aspect-square bg-secondary border border-dashed border-border overflow-hidden group"
+                                onMouseEnter={() => setIsPreviewingZoom(true)}
+                                onMouseLeave={() => setIsPreviewingZoom(false)}
+                              >
+                                {formData.image ? (
+                                  <img 
+                                    src={formData.image} 
+                                    className="h-full w-full object-cover transition-transform duration-500"
+                                    style={{ 
+                                      transform: isPreviewingZoom ? `scale(${formData.zoomLevel / 100})` : 'scale(1)'
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
+                                    Adicione uma imagem
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1721,6 +1777,53 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-2">Versões: fotos alternativas. Vídeos: formato vertical 9:16 recomendado.</p>
+                      </div>
+                      
+                      {/* Zoom Control with Preview (Edit Dialog) */}
+                      <div className="pt-4 border-t border-border">
+                        <Label className="text-xs text-muted-foreground mb-2 block">Efeito de Zoom (Hover)</Label>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="range"
+                                min="100"
+                                max="130"
+                                step="5"
+                                value={formData.zoomLevel}
+                                onChange={(e) => setFormData(prev => ({ ...prev, zoomLevel: Number(e.target.value) }))}
+                                className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
+                                data-testid="input-zoom-level-edit"
+                              />
+                              <span className="font-mono text-sm w-12 text-center">{formData.zoomLevel}%</span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                              100% = sem zoom, 105% = zoom padrão, 130% = zoom máximo
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-xs">Preview (passe o mouse)</Label>
+                            <div 
+                              className="relative aspect-square bg-secondary border border-dashed border-border overflow-hidden group"
+                              onMouseEnter={() => setIsPreviewingZoom(true)}
+                              onMouseLeave={() => setIsPreviewingZoom(false)}
+                            >
+                              {formData.image ? (
+                                <img 
+                                  src={formData.image} 
+                                  className="h-full w-full object-cover transition-transform duration-500"
+                                  style={{ 
+                                    transform: isPreviewingZoom ? `scale(${formData.zoomLevel / 100})` : 'scale(1)'
+                                  }}
+                                />
+                              ) : (
+                                <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
+                                  Adicione uma imagem
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

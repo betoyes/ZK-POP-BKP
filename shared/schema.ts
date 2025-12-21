@@ -142,6 +142,8 @@ export const products = pgTable("products", {
   mainStoneName: text("main_stone_name"), // Name for the base price (e.g., "Diamante Natural")
   // Dynamic stone variations - JSON array of {name, price, description}
   stoneVariations: text("stone_variations"), // JSON string: [{name: "Diamante Natural", price: 10000, description: "..."}]
+  // Zoom level for hover effect (100 = no zoom, 105 = 5% zoom, 110 = 10% zoom, etc)
+  zoomLevel: integer("zoom_level").default(105),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({ id: true });

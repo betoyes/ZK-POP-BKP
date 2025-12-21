@@ -249,13 +249,19 @@ export default function Home() {
                       const isNoivas = category?.slug === 'noivas' || category?.name?.toLowerCase() === 'noivas';
                       const hasColorImage = product.imageColor && product.image !== product.imageColor;
                       
+                      // Get zoom level from product or use default (105 = 1.05 scale)
+                      const zoomScale = (product.zoomLevel || 105) / 100;
+                      
                       if (isNoivas) {
                         return (
                           <img 
                             src={hasColorImage ? product.imageColor : product.image} 
                             alt={product.name}
                             loading="lazy"
-                            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                            className="w-full h-full object-cover transition-all duration-500"
+                            style={{ transform: 'scale(1)' }}
+                            onMouseOver={(e) => e.currentTarget.style.transform = `scale(${zoomScale})`}
+                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                           />
                         );
                       }
@@ -266,14 +272,20 @@ export default function Home() {
                             src={product.image} 
                             alt={product.name}
                             loading="lazy"
-                            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 grayscale ${!hasColorImage ? 'group-hover:grayscale-0' : ''}`}
+                            className={`w-full h-full object-cover transition-all duration-500 grayscale ${!hasColorImage ? 'group-hover:grayscale-0' : ''}`}
+                            style={{ transform: 'scale(1)' }}
+                            onMouseOver={(e) => e.currentTarget.style.transform = `scale(${zoomScale})`}
+                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                           />
                           {hasColorImage && (
                             <img 
                               src={product.imageColor} 
                               alt={product.name}
                               loading="lazy"
-                              className="absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 opacity-0 group-hover:opacity-100"
+                              className="absolute inset-0 w-full h-full object-cover transition-all duration-500 opacity-0 group-hover:opacity-100"
+                              style={{ transform: 'scale(1)' }}
+                              onMouseOver={(e) => e.currentTarget.style.transform = `scale(${zoomScale})`}
+                              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             />
                           )}
                         </>
