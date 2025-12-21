@@ -2434,14 +2434,76 @@ export default function Dashboard() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label>URL da Mídia</Label>
-                  <Input 
-                    value={brandingForm.heroMediaUrl} 
-                    onChange={(e) => setBrandingForm({...brandingForm, heroMediaUrl: e.target.value})}
-                    className="rounded-none"
-                    placeholder="https://..."
-                  />
-                  <p className="text-[10px] text-muted-foreground">Cole a URL da imagem ou vídeo desejado.</p>
+                  <Label>Upload da Mídia (Hero)</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="relative aspect-video bg-secondary border border-dashed border-border flex items-center justify-center overflow-hidden">
+                        {brandingForm.heroMediaUrl ? (
+                          <>
+                            {brandingForm.heroMediaType === 'video' ? (
+                              <video 
+                                src={brandingForm.heroMediaUrl} 
+                                className="h-full w-full object-cover" 
+                                muted 
+                                loop 
+                                autoPlay
+                              />
+                            ) : (
+                              <img 
+                                src={brandingForm.heroMediaUrl} 
+                                className="h-full w-full object-cover" 
+                                alt="Hero"
+                              />
+                            )}
+                            <button 
+                              type="button"
+                              onClick={() => setBrandingForm({...brandingForm, heroMediaUrl: ''})}
+                              className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600"
+                            >
+                              <Trash className="h-4 w-4" />
+                            </button>
+                          </>
+                        ) : (
+                          <label className="cursor-pointer flex flex-col items-center justify-center w-full h-full gap-2">
+                            <Plus className="h-8 w-8 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              {brandingForm.heroMediaType === 'video' ? 'Upload Vídeo' : 'Upload Imagem'}
+                            </span>
+                            <input 
+                              type="file" 
+                              accept={brandingForm.heroMediaType === 'video' ? 'video/*' : 'image/*'}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setBrandingForm({...brandingForm, heroMediaUrl: reader.result as string});
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                              className="hidden" 
+                            />
+                          </label>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">
+                        {brandingForm.heroMediaType === 'video' 
+                          ? 'Vídeos em formato 16:9 recomendado (MP4)' 
+                          : 'Imagens em formato 16:9 recomendado (JPG, PNG)'}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">Ou cole uma URL</Label>
+                      <Input 
+                        value={brandingForm.heroMediaUrl?.startsWith('data:') ? '' : brandingForm.heroMediaUrl} 
+                        onChange={(e) => setBrandingForm({...brandingForm, heroMediaUrl: e.target.value})}
+                        className="rounded-none"
+                        placeholder="https://..."
+                      />
+                      <p className="text-[10px] text-muted-foreground">Cole a URL de uma imagem ou vídeo externo.</p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid gap-2">
