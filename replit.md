@@ -104,8 +104,8 @@ Preferred communication style: Simple, everyday language.
 - **Customers**: Extended customer profiles (separate from users)
 - **Orders**: Purchase records with status tracking
 - **Branding**: Configurable site content (hero text, manifesto, company name)
-- **EmailVerificationTokens**: Tokens for email confirmation (24-hour expiry)
-- **PasswordResetTokens**: Tokens for password recovery (1-hour expiry, single-use)
+- **EmailVerificationTokens**: Hashed tokens for email confirmation (24-hour expiry, token_hash column)
+- **PasswordResetTokens**: Hashed tokens for password recovery (1-hour expiry, single-use, token_hash column)
 
 **Schema Design Decisions**
 - Relational structure with foreign keys (categoryId, collectionId on products)
@@ -191,7 +191,11 @@ Preferred communication style: Simple, everyday language.
 - **CSRF Protection**: Session-based CSRF tokens validated on POST/PATCH/DELETE requests
 - **Input Validation**: Zod schemas validate all auth inputs with Portuguese error messages
 - **Password Strength**: Minimum 8 characters with complexity requirements
-- **Secure Tokens**: crypto.randomBytes(32) for verification and reset tokens
+- **Secure Token Hashing**: Tokens are never stored in plaintext
+  - crypto.randomBytes(32) generates random tokens
+  - Only SHA256 hash is stored in database (token_hash column)
+  - Raw token is sent only via email link
+  - Validation compares SHA256(received_token) with stored hash
 
 ### LGPD (Brazilian Data Protection Law) Compliance
 - **Consent Management**: Users must accept Terms and Privacy Policy during registration
@@ -236,12 +240,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (December 2025)
 
-1. **LGPD Compliance**: Full implementation of Brazilian data protection requirements
-2. **Security Hardening**: Rate limiting, CSRF protection, input validation, audit logging
-3. **Email Verification Flow**: Complete flow with resend capability
-4. **Password Reset Improvements**: Secure tokens with invalidation of previous tokens
-5. **Privacy Dashboard**: Frontend for managing consents, data export, and account deletion
-6. **Registration with Consents**: Required checkboxes for terms and privacy policy
+1. **Token Hashing Security**: Email verification and password reset tokens now use SHA256 hashing
+   - Plaintext tokens never stored in database
+   - Only token_hash column stores SHA256(token)
+   - Raw tokens sent only via email links
+   - Migration script: `script/migrate-token-hashing.sql`
+2. **LGPD Compliance**: Full implementation of Brazilian data protection requirements
+3. **Security Hardening**: Rate limiting, CSRF protection, input validation, audit logging
+4. **Email Verification Flow**: Complete flow with resend capability
+5. **Password Reset Improvements**: Secure tokens with invalidation of previous tokens
+6. **Privacy Dashboard**: Frontend for managing consents, data export, and account deletion
+7. **Registration with Consents**: Required checkboxes for terms and privacy policy
 
 ## Previous Changes (November 2025)
 
