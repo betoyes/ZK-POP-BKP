@@ -107,7 +107,10 @@ export async function sendAdminNotification(
   type: 'newsletter' | 'lead' | 'customer' | 'order',
   data: { name?: string; email?: string; total?: number; orderId?: string; items?: number }
 ) {
-  const adminEmail = 'betoyes@gmail.com';
+  const adminEmail = process.env.ADMIN_NOTIFY_EMAIL || 
+    (process.env.NODE_ENV === "production" 
+      ? (() => { throw new Error("ADMIN_NOTIFY_EMAIL must be set in production"); })() 
+      : "admin@localhost");
   
   try {
     const { client, fromEmail } = await getResendClient();

@@ -630,7 +630,10 @@ export async function registerRoutes(
   });
 
   // ============ ADMIN MANAGEMENT ROUTES ============
-  const PRIMARY_ADMIN_EMAIL = "betoyes@gmail.com";
+  const PRIMARY_ADMIN_EMAIL = process.env.PRIMARY_ADMIN_EMAIL || 
+    (process.env.NODE_ENV === "production" 
+      ? (() => { throw new Error("PRIMARY_ADMIN_EMAIL must be set in production"); })() 
+      : "admin@localhost");
 
   // Get all admins (only primary admin can access)
   app.get("/api/admin/users", requireAdmin, async (req, res, next) => {

@@ -180,9 +180,31 @@ Preferred communication style: Simple, everyday language.
 - Password reset links (1-hour expiry)
 - Fallback to onboarding@resend.dev if domain not verified
 
+## Environment Variables
+
+### Required in Production
+| Variable | Description | Default (Dev Only) |
+|----------|-------------|-------------------|
+| `SESSION_SECRET` | Secret key for session encryption | None (required always) |
+| `PRIMARY_ADMIN_EMAIL` | Email of the primary admin user | `admin@localhost` |
+| `ADMIN_NOTIFY_EMAIL` | Email to receive admin notifications | `admin@localhost` |
+| `DATABASE_URL` | PostgreSQL connection string | Provided by Replit |
+
+### Security Notes
+- `PRIMARY_ADMIN_EMAIL` and `ADMIN_NOTIFY_EMAIL` have safe defaults for development only
+- In production, the app will crash if these are not set (fail-fast security)
+- Never commit real email addresses to code
+
 ## Security & LGPD Compliance
 
 ### Security Features
+- **Helmet Security Headers**: HTTP security headers configured for protection
+  - HSTS: Enabled in production (1 year max-age, includeSubDomains)
+  - X-Frame-Options: DENY (prevents clickjacking)
+  - X-Content-Type-Options: nosniff (prevents MIME sniffing)
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - Content-Security-Policy: Conservative policy allowing self + inline styles/scripts
+  - X-Powered-By: Hidden
 - **Rate Limiting**: Protection against brute force attacks
   - Login: 5 attempts per 15 minutes per IP
   - Register: 3 attempts per hour per IP
