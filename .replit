@@ -9,7 +9,6 @@ packages = ["lsof", "nano"]
 [deployment]
 deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
-publicDir = "dist/public"
 run = ["node", "./dist/index.cjs"]
 
 [[ports]]
@@ -51,6 +50,7 @@ waitForPort = 5000
 [agent]
 mockupState = "FULLSTACK"
 integrations = ["javascript_database:1.0.0", "resend:1.0.0"]
+expertMode = true
 
 [userenv]
 
