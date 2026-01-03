@@ -76,13 +76,24 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         const categoriesData = await categoriesRes.json().catch(() => []);
         const collectionsData = await collectionsRes.json().catch(() => []);
         const postsData = await postsRes.json().catch(() => []);
-        const brandingData = await brandingRes.json().catch(() => initialBranding);
+        
+        let brandingData = initialBranding;
+        if (brandingRes.ok) {
+          try {
+            const data = await brandingRes.json();
+            if (data && data.companyName) {
+              brandingData = data;
+            }
+          } catch (err) {
+            console.error('Failed to parse branding data:', err);
+          }
+        }
         
         setProducts(productsData || []);
         setCategories(categoriesData || []);
         setCollections(collectionsData || []);
         setPosts(postsData || []);
-        setBranding(brandingData || initialBranding);
+        setBranding(brandingData);
       } catch (err) {
         console.error('Failed to load initial data:', err);
       } finally {
